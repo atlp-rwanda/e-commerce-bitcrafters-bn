@@ -1,0 +1,1 @@
+[![Node.js CI](https://github.com/atlp-rwanda/e-commerce-bitcrafters-bn/actions/workflows/node.js.yml/badge.svg)](https://github.com/atlp-rwanda/e-commerce-bitcrafters-bn/actions/workflows/node.js.yml)
