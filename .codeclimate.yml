@@ -1,0 +1,33 @@
+version: '2'
+checks:
+  complex-logic:
+    enabled: false
+  method-lines:
+    config:
+      threshold: 50
+    eslint:
+      enabled: true
+exclude_patterns:
+  - '**/package-lock.json/'
+  - '**/.env/*'
+  - '**/test/*'
+  - '**/tests/*'
+  - '**/dist/*'
+  - '**/coverage/*'
+
+version: '2'
+checks:
+  complex-logic:
+    enabled: false
+  method-lines:
+    config:
+      threshold: 50
+    eslint:
+      enabled: true
+exclude_patterns:
+  - '**/package-lock.json/'
+  - '**/.env/*'
+  - '**/test/*'
+  - '**/tests/*'
+  - '**/dist/*'
+  - '**/coverage/*'
