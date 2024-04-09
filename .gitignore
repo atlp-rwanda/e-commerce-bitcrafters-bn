@@ -1,6 +1,5 @@
 node_modules
-.node_modules
-./node_modules 
+ 
 /dist
 
 coverage
@@ -12,3 +11,9 @@ coverage
 .env
 /.env
 ./.env
+
+build
+
+
+dist
+./dist
