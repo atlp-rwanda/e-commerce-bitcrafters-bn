@@ -1,3 +1,4 @@
+// index.ts
 import express from 'express';
 import http from 'http';
 import bodyParser from 'body-parser';
@@ -6,9 +7,11 @@ import compression from 'compression';
 import dotenv from 'dotenv';
 import swaggerUi from "swagger-ui-express";
 import specs from "./src/helpers/swagger";
+import sequelize from './src/config/database';
+import router from './src/routes/routes'
 
-dotenv.config()
-let port  = process.env.PORT || 3000
+dotenv.config();
+const port = process.env.PORT || 3000;
 
 export const  app = express();
 // Serve Swagger UI
@@ -20,16 +23,30 @@ app.use(cors({
 }))
 
 app.use(compression()); 
+app.use(compression()); 
 app.use(bodyParser.json());
-
+app.use(router);
 const server = http.createServer(app);
 
-app.get('/welcome', (req:any, res:any)=>{
-  res.status(200).send({message:"Welcome to my API"})
-})
-  server.listen(port, ()=>{
-    console.log(`listening on port https://localhost:${port}`)
-}) 
+//Testing if the database is authenticated and listening the port
+async function startServer() {
+    try {
+        await sequelize.authenticate();
+        console.log('Connection to the database has been established successfully.');
 
-// app.use('/', router())
-//startServer();
+        await sequelize.sync();
+        console.log('All models were synchronized successfully.');
+
+        server.listen(port, () => {
+            console.log(`Server is listening on port http://localhost:${port}`);
+        });
+    } catch (error) {
+        console.error('Unable to start the server:', error);
+    }
+}
+
+app.get('/welcome', (req, res) => {
+    res.status(200).send({ message: "Welcome to my API" });
+});
+
+startServer(); 

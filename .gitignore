@@ -12,3 +12,9 @@ coverage
 .env
 /.env
 ./.env
+
+build
+./build
+
+dist
+./dist

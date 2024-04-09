@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
-
-      "module":"NodeNext",
+      // "module":"NodeNext",
       // "moduleResolution":"node",
+      "module": "commonjs",
       "baseUrl":"src",
       "outDir":"dist",
       "sourceMap":true,
       "noImplicitAny":true,
+      "target": "es6",
+      "strict": true,
+      "esModuleInterop": true
   },
-  "include": ["src/**/*", "test"]
+  "include": ["src/**/*", "index.ts"]
 }
