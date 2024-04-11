@@ -1,22 +1,8 @@
 // models/user.ts
-import { DataTypes, Model } from 'sequelize';
-import sequelize from '../config/database'
+import { DataTypes, Sequelize } from 'sequelize';
+import sequelize from '../config/database';
 
-interface UserAttributes {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-}
-
-class User extends Model<UserAttributes> implements UserAttributes {
-  public id!: number;
-  public name!: string;
-  public email!: string;
-  public password!: string;
-}
-
-User.init({
+const User = sequelize.define('User', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -36,8 +22,6 @@ User.init({
     allowNull: false,
   },
 }, {
-  sequelize,
-  modelName: 'User',
   timestamps: false,
 });
 
