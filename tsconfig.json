@@ -1,11 +1,15 @@
 {
   "compilerOptions": {
-    "module": "NodeNext",
+    "target": "ES2019",
+    "module": "CommonJS",
     // "moduleResolution":"node",
     "baseUrl": "src",
-    "outDir": "dist",
+    "outDir": "./dist",
     "sourceMap": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "strict": true,
+      "esModuleInterop": true
   },
-  "include": ["src/**/*", "test"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
 }

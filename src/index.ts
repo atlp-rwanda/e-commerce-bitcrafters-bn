@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import compression from "compression";
 import dotenv from "dotenv";
-import sequelize from "./src/config/database";
+import sequelize from "./config/database";
 
 dotenv.config();
 const port = process.env.PORT || 3000;

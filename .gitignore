@@ -1,6 +1,7 @@
 node_modules
 .nole_modules
 ./nole_modules 
+/dist
 
 coverage
 ./coverage
