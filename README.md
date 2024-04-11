@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # e-commerce-bitcrafters-bn
 Welcome to the backend repository for E-Commerce BitCrafters, an open-source e-commerce platform designed and developed by the BitCrafters team. This repository contains the backend code responsible for managing the database and handling server-side operations.
 
