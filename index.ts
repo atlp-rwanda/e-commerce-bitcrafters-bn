@@ -6,7 +6,6 @@ import cors from 'cors';
 import compression from 'compression';
 import dotenv from 'dotenv';
 import sequelize from './src/config/database';
-import User from './src/models/user'; // Import User model
 import router from './src/routes/routes'
 dotenv.config();
 const port = process.env.PORT || 3000;
