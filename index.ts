@@ -1,11 +1,12 @@
+// index.ts
 import express from 'express';
 import http from 'http';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import compression from 'compression';
 import dotenv from 'dotenv';
-import  sequelize  from './src/config/database';
-
+import sequelize from './src/config/database';
+import router from './src/routes/routes'
 dotenv.config();
 const port = process.env.PORT || 3000;
 
@@ -17,7 +18,7 @@ app.use(cors({
 
 app.use(compression());
 app.use(bodyParser.json());
-
+app.use(router);
 const server = http.createServer(app);
 
 //Testing if the database is authenticated and listening the port

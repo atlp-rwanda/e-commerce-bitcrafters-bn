@@ -9,7 +9,7 @@ const POSTGRES_DATABASE = process.env.POSTGRES_DATABASE
 
 const sequelize = new Sequelize({
   dialect: 'postgres',
-  host: "db" || 'localhost',
+  host: 'localhost' || 'db',
   port: 5432,
   username: POSTGRES_USERNAME,
   password: POSTGRES_PASSWORD,
