@@ -1,6 +1,6 @@
 FROM node:16 
 
-WORKDIR /usr/src/app
+WORKDIR /e-commerce-bitcrafters-bn
 
 COPY package*.json ./ 
 RUN npm install
