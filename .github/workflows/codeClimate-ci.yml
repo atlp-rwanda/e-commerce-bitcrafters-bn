@@ -37,9 +37,14 @@ jobs:
       with:
         node-version: '18'
     - run: npm install
-    - uses: atlp-rwanda/e-commerce-bitcrafters-bn@develop
+    - name: Upload test report to Code Climate
+      uses: atlp-rwanda/e-commerce-bitcrafters-bn@develop
+      id: codeclimate
       env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        CC_TEST_REPORTER_ID: 9d80c597677ee5de28d25a5d0c55a99e5f2aa56305ccc14745665d9121a05817
       with:
         coverageCommand: npm run test
         debug: true
+    - name: Check if test report uploaded successfully
+      if: steps.codeclimate.outputs.exit-code == 0
+      run: echo "Test report uploaded successfully!"
