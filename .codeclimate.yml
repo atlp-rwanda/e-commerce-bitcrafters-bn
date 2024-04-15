@@ -12,3 +12,5 @@ exclude_patterns:
   - '**/.env/*'
   - '**/test/*'
   - '**/tests/*'
+  - '**/dist/*'
+  - '**/coverage/*'
