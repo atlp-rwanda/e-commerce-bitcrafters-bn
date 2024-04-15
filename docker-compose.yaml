@@ -32,7 +32,7 @@ services:
 
     stdin_open: true
     tty: true
-
+ 
     ports:
      - ${DOCKER_LOCAL_PORT}:${PORT}
 
