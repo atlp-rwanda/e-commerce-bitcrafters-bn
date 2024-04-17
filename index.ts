@@ -43,3 +43,5 @@ app.get('/welcome', (req, res) => {
 });
 
 startServer();
+
+export default app;
