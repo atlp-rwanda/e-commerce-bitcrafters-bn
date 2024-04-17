@@ -1,9 +1,9 @@
-node_modules
-.nole_modules
-./nole_modules 
 
-coverage
+./node_modules 
+./dist
 ./coverage
+/.env
 
 ./.nyc_output
 .nyc_output
+node_modules
