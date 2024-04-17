@@ -5,13 +5,13 @@
   "main": "index.ts",
   "scripts": {
     "start": "nodemon",
-    "test": "echo \"Error: no test specified\""
+    "test": "nyc mocha --require ts-node/register test/*.ts",
+    "coverage": "NODE_ENV=test nyc --reporter=text --reporter=lcov mocha --require ts-node/register test/*.ts --coverage && nyc report --reporter=text-lcov | coveralls"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/body-parser": "^1.19.5",
     "@types/body-parser": "^1.19.5",
     "@types/compression": "^1.7.5",
     "@types/cors": "^2.8.17",
