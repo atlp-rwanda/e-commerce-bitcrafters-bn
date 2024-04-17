@@ -1,3 +1,4 @@
+
 ## E-COMMERCE-BITCRAFTERS-BN
 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/atlp-rwanda/e-commerce-bitcrafters-bn/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/atlp-rwanda/e-commerce-bitcrafters-bn/tree/main)
@@ -95,3 +96,4 @@ If you want to contact us you can reach us at `bitcrafters.andela@gmail.com`.
 ## License
 
 This project uses the following license: MIT Licence.
+
