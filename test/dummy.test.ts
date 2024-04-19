@@ -43,4 +43,3 @@ describe("Test calculator", () => {
         expect(result).to.equal(1);
     })
 })
-
