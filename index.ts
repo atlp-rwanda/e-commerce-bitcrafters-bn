@@ -43,3 +43,13 @@ app.get('/welcome', (req, res) => {
 });
 
 startServer();
+
+app.get('/welcome', (req:any, res:any)=>{
+  res.status(200).send({message:"Welcome to my API"})
+})
+  server.listen(port, ()=>{
+    console.log(`listening on port https://localhost:${port}`)
+}) 
+
+// app.use('/', router())
+startServer();
