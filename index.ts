@@ -13,14 +13,15 @@ import router from './src/routes/routes'
 dotenv.config();
 const port = process.env.PORT || 3000;
 
-export const  app = express();
+const app = express()
 // Serve Swagger UI
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
-
-app.use(cors({
-    credentials:true,
-}))
+app.use(
+  cors({
+    credentials: true,
+  }),
+)
 
 app.use(compression()); 
 app.use(compression()); 

@@ -1,15 +1,14 @@
 {
   "compilerOptions": {
-      // "module":"NodeNext",
-      // "moduleResolution":"node",
-      "module": "commonjs",
-      "baseUrl":"src",
-      "outDir":"dist",
-      "sourceMap":true,
-      "noImplicitAny":true,
-      "target": "es6",
-      "strict": true,
-      "esModuleInterop": true
+    "module": "CommonJS",
+    "baseUrl": "src",
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "allowJs": true,
+    "target": "es6",
+    "strict": true,
   },
-  "include": ["src/**/*", "index.ts"]
+  "include": ["src/**/*", "index.ts", "test"]
 }

@@ -1,4 +1,3 @@
-
 ## E-COMMERCE-BITCRAFTERS-BN
 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/atlp-rwanda/e-commerce-bitcrafters-bn/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/atlp-rwanda/e-commerce-bitcrafters-bn/tree/main)
@@ -76,18 +75,9 @@ Step-by-step instructions so that the developer can understand how code gets upd
 
 Thanks to the following people who have contributed to this project:
 
-Contributors
-    - `Gatete Ishema Angelo Christian`
-    - `Mpano Athos`
-    - `Furaha Justine`
-    - `Irankunda Yvan David`
-    - `Bananayo Sosthene`
-    - `Niyokwizerwa Eric`
-    - `Impano Chretien Fidel`
+Contributors - `Gatete Ishema Angelo Christian` - `Mpano Athos` - `Furaha Justine` - `Irankunda Yvan David` - `Bananayo Sosthene` - `Niyokwizerwa Eric` - `Impano Chretien Fidel`
 
-Managers:
-    - `Munezero Sosthene`
-    - `Didas Mbalanya`
+Managers: - `Munezero Sosthene` - `Didas Mbalanya`
 
 ## Contact
 
@@ -96,4 +86,3 @@ If you want to contact us you can reach us at `bitcrafters.andela@gmail.com`.
 ## License
 
 This project uses the following license: MIT Licence.
-

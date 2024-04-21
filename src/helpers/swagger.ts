@@ -1,35 +1,35 @@
-import swaggerJsdoc, { Options } from "swagger-jsdoc";
+import swaggerJsdoc, { Options } from 'swagger-jsdoc'
 
-const PORT = 8080; // Assuming you have PORT defined somewhere
+const PORT = 8080 // Assuming you have PORT defined somewhere
 
 const swaggerOptions: Options = {
   swaggerDefinition: {
-    openapi: "3.0.0",
+    openapi: '3.0.0',
     info: {
-      title: "My API Documentation",
-      version: "1.0.0",
-      description: "Documentation for My Brand Express API",
+      title: 'My API Documentation',
+      version: '1.0.0',
+      description: 'Documentation for My Brand Express API',
     },
     servers: [
       {
         url: `http://localhost:${PORT}`,
-        description: "",
+        description: '',
       },
     ],
     components: {
       securitySchemes: {
         bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
         },
       },
     },
     security: [{ bearerAuth: [] as string[] }], //  define bearerAuth as an array of strings
   },
-  apis: ["./src/routes/*.ts"], // Path to the files containing your route definitions
-};
+  apis: ['./src/routes/*.ts'], // Path to the files containing your route definitions
+}
 
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
+const swaggerSpec = swaggerJsdoc(swaggerOptions)
 
-export default swaggerSpec;
+export default swaggerSpec
