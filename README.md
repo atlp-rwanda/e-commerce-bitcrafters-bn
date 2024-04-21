@@ -36,6 +36,7 @@ To install this project, follow these steps:
 2. Open a terminal/command prompt in the directory where you downloaded the project.
 3. Run `npm install` to install all dependencies listed in the package.json file.
 4. Create a `.env` file at the root level of the project folder. Add the necessary environment variables for connecting to your database.
+5. Run `npx sequelize-cli db:migrate` for running migrations
 
 ### Run The Service
 
