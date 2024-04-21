@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-
-      "module":"NodeNext",
-      // "moduleResolution":"node",
-      "baseUrl":"src",
-      "outDir":"dist",
-      "sourceMap":true,
-      "noImplicitAny":true,
+    "module": "CommonJS",
+    "baseUrl": "src",
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "allowJs": true
   },
-  "include": ["src/**/*", "test"]
+  "include": ["src/**/*", "index.ts", "test"]
 }
