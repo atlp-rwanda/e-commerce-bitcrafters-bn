@@ -1,0 +1,20 @@
+version: "3"
+services:
+  web:
+    build: .
+    ports:
+      - "3001:3001"
+  db:
+    image: "postgres"
+    ports:
+      - "5435:5432"
+
+  app:
+    image: e-commerce-bitcrafters-bn
+    ports:
+      - "6000:8080"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-elitypescript}
+    command: npm run start

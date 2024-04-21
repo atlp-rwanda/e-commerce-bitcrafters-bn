@@ -5,10 +5,10 @@ import cors from 'cors';
 import compression from 'compression';
 import dotenv from 'dotenv'
 import swaggerUi from "swagger-ui-express";
-import specs from "./swagger";
+import specs from "./src/helpers/swagger";
 
 dotenv.config()
-let port  = process.env.PORT;
+let port  = process.env.PORT || 3000;
 
 export const  app = express();
 // Serve Swagger UI

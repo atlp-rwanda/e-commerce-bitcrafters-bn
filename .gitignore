@@ -1,7 +1,15 @@
 node_modules
-./dist
+.node_modules
+./node_modules 
+/dist
+
+coverage
 ./coverage
 /.env
 
 ./.nyc_output
 .nyc_output
+
+.env
+/.env
+./.env
