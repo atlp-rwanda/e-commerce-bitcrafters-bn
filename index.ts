@@ -3,12 +3,17 @@ import http from 'http';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import compression from 'compression';
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
+import swaggerUi from "swagger-ui-express";
+import specs from "./src/helpers/swagger";
 
 dotenv.config()
 let port  = process.env.PORT || 3000
 
 export const  app = express();
+// Serve Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+
 
 app.use(cors({
     credentials:true,
@@ -27,4 +32,4 @@ app.get('/welcome', (req:any, res:any)=>{
 }) 
 
 // app.use('/', router())
-startServer();
+//startServer();
