@@ -29,7 +29,7 @@ app.get('/welcome', (req: Request, res: Response) => {
   res.status(200).send({ message: 'Welcome to my API' })
 })
 server.listen(port, () => {
-  // console.log(`listening on port https://localhost:${port}`)
+  console.log(`listening on port https://localhost:${port}`)
 })
 
 export default app
