@@ -6,7 +6,8 @@
     "src/config/database.ts",
     "test/**",
     "src/helpers/swagger.ts",
-    "index.ts"
+    "index.ts",
+    "src/database"
   ],
   "cache": false,
   "all": true,
