@@ -39,7 +39,7 @@
  *     summary: Create a new user
  *     description: Creates a new user
  *     tags:
- *       -SIGNUP
+ *       - SIGNUP
  *     requestBody:
  *       description: User object to be created
  *       required: true

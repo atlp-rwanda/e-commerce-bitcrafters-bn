@@ -70,10 +70,13 @@ describe('Signup Test', () => {
 })
 
 after(async () => {
-  await new Promise<void>((resolve, reject) => {
-    server.close((err?: Error) => {
-      if (err) return reject(err)
-      resolve()
+  // Check if the server is running before attempting to close it
+  if (server && server.listening) {
+    await new Promise<void>((resolve, reject) => {
+      server.close((err?: Error) => {
+        if (err) return reject(err)
+        resolve()
+      })
     })
-  })
+  }
 })
