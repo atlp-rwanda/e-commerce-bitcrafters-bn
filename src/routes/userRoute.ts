@@ -3,6 +3,8 @@ import UserController from '../controllers/UserController'
 import userSchema, {
   profileValidationalSchema,
   otpSchema,
+  resetPasswordsLinkSchema,
+  newPasswordSchema,
 } from '../validations/userValidation'
 import validateRequest from '../utils/validateRequest'
 import { singleFileUpload } from '../middlewares/fileUpload'
@@ -36,7 +38,7 @@ router.post(
   checkPermission(UserRole.ADMIN),
   UserController.changeUserRole,
 )
-router.post('/logout',isAuthenticated, LoginController.logOut)
+router.post('/logout', isAuthenticated, LoginController.logOut)
 
 router.post(
   '/changeRole/:userId',
@@ -54,5 +56,14 @@ router.get(
   validateRequest(paramSchema, 'params'),
   UserController.verifyEmail,
 )
-
+router.post(
+  '/reset/link',
+  validateRequest(resetPasswordsLinkSchema, 'body'),
+  UserController.resetPasswordLink,
+)
+router.post(
+  '/reset/password/:token',
+  validateRequest(newPasswordSchema, 'body'),
+  UserController.newPassword,
+)
 export default router

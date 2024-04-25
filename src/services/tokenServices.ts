@@ -40,3 +40,16 @@ export const validateAndRetrieveToken = async (token: string) => {
     return null
   }
 }
+
+export const validateRedisToken = (token: string) => {
+  try {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET_RESET,
+    ) as JwtPayload
+    return decoded
+  } catch (error) {
+    console.error('Token validation error:', error)
+    return null
+  }
+}
