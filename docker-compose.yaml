@@ -1,12 +1,11 @@
-version: "3"
+version: '3'
 
 services:
-
   database:
-    image: "postgres"
+    image: 'postgres'
     env_file: .env
     ports:
-    - ${DOCKER_POSTGRES_PORT}:${POSTGRES_PORT}
+      - ${DOCKER_POSTGRES_PORT}:${POSTGRES_PORT}
 
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -27,7 +26,7 @@ services:
     env_file: .env
 
     environment:
-      POSTGRES_HOST: "database"
+      POSTGRES_HOST: 'database'
       POSTGRES_PORT: $PORT
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_USERNAME: ${POSTGRES_USERNAME}
@@ -36,12 +35,12 @@ services:
     stdin_open: true
     tty: true
     ports:
-     - 3000:8080
+      - 3000:8080
 
     command: npm run start
 
     volumes:
-      - .:/e-commerce-bitcrafters-bn 
+      - .:/e-commerce-bitcrafters-bn
 
   app-development:
     image: e-commerce-bitcrafters-bn-dev
@@ -52,25 +51,22 @@ services:
       target: development
     volumes:
       - .:/e-commerce-bitcrafters-bn
-    
+
     env_file: .env
 
     environment:
-      POSTGRES_HOST: "database"
+      POSTGRES_HOST: 'database'
       POSTGRES_PORT: $PORT
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_USERNAME: ${POSTGRES_USERNAME}
       POSTGRES_DATABASE: ${POSTGRES_DATABASE}
- 
+
     stdin_open: true
     tty: true
     ports:
       - ${DOCKER_LOCAL_PORT}:${PORT}
-      
+
     command: npm run dev
-
-
-
 # the development database runs on port 8080
 # the production database runs on port 3000
 

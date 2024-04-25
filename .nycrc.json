@@ -1,6 +1,7 @@
 {
   "extends": "@istanbuljs/nyc-config-typescript",
   "exclude": [
+    "dist/**/*.js",
     "node_modules/**",
     "coverage/**",
     "src/config/database.ts",
