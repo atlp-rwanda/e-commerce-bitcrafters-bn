@@ -11,6 +11,7 @@ import isAuthenticated, {
 } from '../middlewares/authenticationMiddleware'
 import { UserRole } from '../database/models/userModel'
 import paramSchema from '../validations/paramValidation'
+import LoginController from '../controllers/LoginController'
 
 const router = Router()
 
@@ -35,6 +36,7 @@ router.post(
   checkPermission(UserRole.ADMIN),
   UserController.changeUserRole,
 )
+router.post('/logout',isAuthenticated, LoginController.logOut)
 
 router.post(
   '/changeRole/:userId',

@@ -47,7 +47,7 @@
  *     summary: Create a new user
  *     description: Creates a new user
  *     tags:
- *       [SIGNUP]
+ *       - AUTH
  *     requestBody:
  *       description: User object to be created
  *       required: true
@@ -92,7 +92,7 @@
  *     summary: Verify OTP for two-factor authentication
  *     description: Verifies the one-time password (OTP) provided by the user during the two-factor authentication process.
  *     tags:
- *       - Two-Factor Authentication
+ *       - AUTH
  *     parameters:
  *       - in: path
  *         name: email
@@ -140,7 +140,7 @@
  *     summary: Verifies a user
  *     description: Verifies a user's account through their email using a verification token.
  *     tags:
- *       - AUTHENTICATION
+ *       - AUTH
  *     parameters:
  *       - in: path
  *         name: token

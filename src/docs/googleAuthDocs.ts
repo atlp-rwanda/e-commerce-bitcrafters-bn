@@ -50,7 +50,7 @@
  *     summary: Authentication via Google
  *     description: User is able to login via Google account
  *     tags:
- *       - LOGIN
+ *       - AUTH
  *     security:
  *       - googleAuth: [email, profile]
  *     responses:

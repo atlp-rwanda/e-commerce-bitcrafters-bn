@@ -5,7 +5,7 @@
  *     summary: User login
  *     description: Logs in an existing user
  *     tags:
- *       - LOGIN
+ *       - AUTH
  *     requestBody:
  *       description: User credentials for login
  *       required: true

@@ -4,10 +4,13 @@ import bcrypt from 'bcryptjs'
 import { app, server } from '../index'
 import sequelizeConnection from '../src/database/config/db.config'
 import User from '../src/database/models/userModel'
+import redisClient from '../src/utils/redisConfiguration'
 
 chai.should()
 chai.use(chaiHttp)
 const { expect } = chai
+
+let token: string
 
 const existingUser = {
   username: 'Test',
@@ -26,16 +29,12 @@ const verifiedUser = {
 
 before(async function setup() {
   this.timeout(100000)
-  try {
     await sequelizeConnection.authenticate()
     existingUser.password = await bcrypt.hash('Testing123', 10)
     const user = await User.findOne({ where: { email: existingUser.email } })
     if (!user) {
       await User.create(existingUser)
     }
-  } catch (error) {
-    process.exit(1)
-  }
 })
 
 describe('Login Controller', () => {
@@ -92,6 +91,51 @@ describe('Login Controller', () => {
       .to.have.property('message')
       .to.equal('A verification email has been sent')
   })
+})
+ // ======================  LOGOUT =============================================
+it('Should logout user, remove token from Redis and headers', async function () {
+  this.timeout(100000)
+  
+  // Login the user to obtain the JWT token
+  const loginRes = await chai
+    .request(app)
+    .post('/users/login')
+    .send({ email: existingUser.email, password: '12345678' })
+
+  expect(loginRes).to.have.status(200)
+  expect(loginRes.body).to.have.property('authToken')
+
+  const token = loginRes.body.authToken
+
+  const authenticatedUser = await User.findOne({ where: { email: existingUser.email } })
+  if (!authenticatedUser) {
+    throw new Error('Authenticated user not found')
+  }
+
+  const userId = authenticatedUser.id
+  const tokenExistsBeforeLogout = await redisClient.exists(`user:${userId}`)
+  expect(tokenExistsBeforeLogout).to.equal(1)
+
+  // Perform the logout action after successful login
+  const logoutRes = await chai
+    .request(app)
+    .post('/users/logout')
+    .set('Authorization', `Bearer ${token}`)
+
+  expect(logoutRes).to.have.status(200)
+  expect(logoutRes.body).to.have.property('message', 'Logout successfully')
+
+  const tokenExistsAfterLogout = await redisClient.exists(`user:${userId}`)
+  expect(tokenExistsAfterLogout).to.equal(0)
+
+  // Attempt to logout again with the same token
+  const secondLogoutRes = await chai
+    .request(app)
+    .post('/users/logout')
+    .set('Authorization', `Bearer ${token}`)
+
+  expect(secondLogoutRes).to.have.status(401)
+  expect(secondLogoutRes.body).to.have.property('message', 'Already logged out')
 })
 
 after(async () => {
