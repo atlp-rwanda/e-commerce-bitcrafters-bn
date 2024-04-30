@@ -1,6 +1,6 @@
 import swaggerJsdoc, { Options } from 'swagger-jsdoc'
 
-const PORT = 3000 // Assuming you have PORT defined somewhere
+const port = process.env.PORT || 8000 // Assuming you have PORT defined somewhere
 
 const swaggerOptions: Options = {
   swaggerDefinition: {
@@ -8,12 +8,16 @@ const swaggerOptions: Options = {
     info: {
       title: 'My API Documentation',
       version: '1.0.0',
-      description: 'Documentation for My Brand Express API',
+      description: 'Documentation for E-Commerce API',
     },
     servers: [
       {
-        url: `http://localhost:${PORT}`,
-        description: '',
+        url: `http://localhost:${port}`,
+        description: 'Local Server',
+      },
+      {
+        url: `https://e-commerce-bitcrafters-bn-1mpf.onrender.com`,
+        description: 'Deployed Server',
       },
     ],
     components: {

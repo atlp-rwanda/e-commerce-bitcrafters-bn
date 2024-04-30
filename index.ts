@@ -7,7 +7,8 @@ import dotenv from 'dotenv'
 import swaggerUi from 'swagger-ui-express'
 import specs from './src/helpers/swagger'
 import userRoute from './src/routes/userRoute'
-import sequelizeConnection from './src/database/config/db.config'
+import loginRoute from './src/routes/loginRoute'
+import sequelizeConnection from './src/database/config/db.config' // Assuming you have a sequelize instance exported
 
 dotenv.config()
 
@@ -22,10 +23,11 @@ app.use(compression())
 app.use(bodyParser.json())
 
 // Routes
-app.get('/welcome', (req: Request, res: Response) => {
-  res.status(200).json({ message: 'Welcome to my API' })
+app.get('/', (req: Request, res: Response) => {
+  res.status(200).json({ message: 'Welcome to my E-Commerce API' })
 })
 app.use('/users', userRoute)
+app.use('/users', loginRoute)
 
 const server = http.createServer(app)
 server.listen(port)
