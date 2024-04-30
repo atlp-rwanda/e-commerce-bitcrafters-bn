@@ -1,6 +1,12 @@
 import { DataTypes, Model } from 'sequelize'
 import sequelizeConnection from '../config/db.config'
 
+export enum UserRole {
+  ADMIN = 'admin',
+  BUYER = 'buyer',
+  SELLER = 'seller',
+}
+
 /**
  * User Interface
  */

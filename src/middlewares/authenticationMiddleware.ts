@@ -37,3 +37,15 @@ const isAuthenticated = async (
 }
 
 export default isAuthenticated
+
+export const checkPermission =
+  (permissionRole: string) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userInfo = req.user
+
+    const existingUser = await getUserById(userInfo.id)
+    if (existingUser && existingUser.userRole === permissionRole) {
+      return next()
+    }
+    return res.status(401).json({ code: 401, message: 'Unauthorized' })
+  }
