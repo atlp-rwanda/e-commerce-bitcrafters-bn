@@ -8,6 +8,7 @@ import {
 import Product from '../database/models/productModel'
 import Collection from '../database/models/collectionModel'
 import { deleteProductById, getProductById } from '../services/productServices'
+import { UserRole } from '../database/models/userModel'
 
 cloudinary.v2.config({
   cloud_name: CLOUDINARY_CLOUD_NAME,
@@ -112,6 +113,84 @@ export default class productController {
       return res.status(500).json({ message: 'Internal server error' })
     }
   }
+
+  //  User should be able to view specific item
+
+  /**
+   * Retrieves the details of a product.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @returns {Promise<Response>} - A promise that resolves to an Express response.
+   */
+  static async getProductDetails(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
+    const userId = req.user?.id
+    const userRole = req.user?.userRole
+    const productId = req.params.id
+
+    try {
+      const product = await Product.findByPk(productId)
+
+      if (!product) {
+        return res.status(404).json({ status: 404, error: 'Product not found' })
+      }
+
+      if (userRole === UserRole.ADMIN) {
+        if (product.quantity > 0) {
+          return res.status(200).json({
+            status: 200,
+            message: 'Product details retrieved successfully by admin',
+            item: product,
+          })
+        }
+      }
+      if (userRole === UserRole.SELLER) {
+        if (product.sellerId !== userId) {
+          return res.status(403).json({
+            status: 403,
+            message: 'You are not authorized to access this product',
+         })
+      }
+        if (product.quantity > 0) {
+          return res.status(200).json({
+            status: 200,
+            message: 'Product details retrieved successfully by seller',
+            item: product,
+          })
+        }
+      }
+
+      if (userRole === UserRole.BUYER) {
+        const currentDate = new Date()
+        if (
+          product.productStatus !== 'available' ||
+          product.expiryDate < currentDate
+        ) {
+          return res.status(404).json({
+            status: 404,
+            error:
+              product.productStatus !== 'available'
+                ? 'Product is currently unavailable'
+                : 'Product has expired',
+          })
+        }
+        if (product.quantity > 0) {
+          return res.status(200).json({
+            status: 200,
+            message: 'Product details retrieved successfully by buyer',
+            item: product,
+          })
+        }
+      }
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ status: 500, error: 'Internal server error' })
+    }
+  }
+
   /**
    * seller can mark product status as availbale or unavailable
    * @param {Request} req - Express request object
@@ -160,20 +239,19 @@ export default class productController {
    */
   static async deleteProduct(req: Request, res: Response) {
     try {
-      const productId = req.params.productId;
+      const productId = req.params.productId
       const sellerId = req.user?.id
       const product = await getProductById(sellerId, productId)
-      if(product){
+      if (product) {
         const result: number = await deleteProductById(sellerId, productId)
         if (result !== 0) {
-          return res.status(200).json({message: "item deleted"})
+          return res.status(200).json({ message: 'item deleted' })
         }
       } else {
-        return res.status(404).json({message: "item not found"});
+        return res.status(404).json({ message: 'item not found' })
       }
     } catch (error) {
-      return res.status(500).json({ message: 'Internal server error' });
+      return res.status(500).json({ message: 'Internal server error' })
     }
-  };
-
+  }
 }

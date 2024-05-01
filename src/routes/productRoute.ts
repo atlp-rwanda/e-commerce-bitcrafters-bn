@@ -36,6 +36,11 @@ router.patch(
   validateRequest(productStatusSchema, 'body'),
   productController.changeProductStatus,
 )
+router.get(
+  '/product/:id',
+  isAuthenticated,
+  productController.getProductDetails,
+)
 
 
 router.delete(
