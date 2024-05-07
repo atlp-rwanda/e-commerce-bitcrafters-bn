@@ -8,7 +8,9 @@
     "test/**",
     "src/helpers/swagger.ts",
     "index.ts",
-    "src/database"
+    "src/database",
+    "src/docs",
+    "src/config"
   ],
   "cache": false,
   "all": true,
