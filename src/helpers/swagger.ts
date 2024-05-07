@@ -1,6 +1,6 @@
 import swaggerJsdoc, { Options } from 'swagger-jsdoc'
 
-const port = process.env.PORT || 8000 // Assuming you have PORT defined somewhere
+const port = process.env.PORT || 3000 // Assuming you have PORT defined somewhere
 
 const swaggerOptions: Options = {
   swaggerDefinition: {

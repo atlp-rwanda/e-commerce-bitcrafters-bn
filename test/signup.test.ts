@@ -3,7 +3,7 @@ import chaiHttp from 'chai-http'
 import { app, server } from '../index'
 import sequelizeConnection from '../src/database/config/db.config'
 import User from '../src/database/models/userModel'
-
+import express from 'express'
 chai.should()
 chai.use(chaiHttp)
 const { expect } = chai
@@ -55,7 +55,6 @@ describe('Signup Test', () => {
       where: { email: newUser.email },
     })
   })
-
   // IF A USER ALREADY EXISTS
   it('Should return a 409 status code indicating conflicts', (done) => {
     chai
