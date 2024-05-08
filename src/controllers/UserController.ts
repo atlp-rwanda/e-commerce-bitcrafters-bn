@@ -1,8 +1,6 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
 import User from '../database/models/userModel'
-import userSchema from '../validations/userValidation'
 /**
  * User Controller class
  */
@@ -14,10 +12,6 @@ export default class UserController {
    * @returns {Promise<Response>} Promise that resolves to an Express response
    */
   static async signup(req: Request, res: Response): Promise<Response> {
-    const { error } = userSchema.validate(req.body)
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message })
-    }
     const salt = await bcrypt.genSalt(10)
     const hashedpassword = await bcrypt.hash(req.body.password, salt)
 
@@ -35,9 +29,7 @@ export default class UserController {
     })
 
     await newUser.save()
-    const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET)
     return res.status(201).json({
-      jwt: token,
       message: 'Account Created successfully',
     })
   }
