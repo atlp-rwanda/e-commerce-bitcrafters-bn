@@ -6,11 +6,10 @@
     "coverage/**",
     "src/config/database.ts",
     "test/**",
-    "src/helpers/swagger.ts",
+    "src/utils/swagger.ts",
     "index.ts",
     "src/database",
-    "src/docs",
-    "src/utils"
+    "src/docs"
   ],
   "cache": false,
   "all": true,
