@@ -19,6 +19,10 @@ const swaggerOptions: Options = {
         url: `https://e-commerce-bitcrafters-bn-1mpf.onrender.com`,
         description: 'Deployed Server',
       },
+      {
+        url: `/`,
+        description: 'For pull requests',
+      }
     ],
     components: {
       securitySchemes: {
