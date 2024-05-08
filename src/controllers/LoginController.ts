@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 
 import User from '../database/models/userModel'
 import loginSchema from '../validations/userLogin' // Import the login validation schema
-import generateToken from '../utils/jwt'
+import { generateToken } from '../utils/jwt'
 
 /**
  * Controller class for managing user-related operations.

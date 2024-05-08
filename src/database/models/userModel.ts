@@ -4,12 +4,12 @@ import sequelizeConnection from '../config/db.config'
 /**
  * User Interface
  */
-interface UserAttributes {
+export interface UserAttributes {
   id?: number
-  username: string
-  email: string
-  password: string
-  userRole: string
+  username?: string
+  email?: string
+  password?: string
+  userRole?: string
 }
 
 /**
