@@ -1,9 +1,10 @@
 import chai from 'chai'
 import chaiHttp from 'chai-http'
+import express from 'express'
 import { app, server } from '../index'
 import sequelizeConnection from '../src/database/config/db.config'
 import User from '../src/database/models/userModel'
-import express from 'express'
+
 chai.should()
 chai.use(chaiHttp)
 const { expect } = chai
