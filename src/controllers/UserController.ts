@@ -1,6 +1,9 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import User, { UserRole } from '../database/models/userModel'
+import UserProfile from '../database/models/userProfile'
+import { getUserProfileById, updateUserById, updateUserProfileById } from '../services/userServices'
+
 
 /**
  * User Controller class
@@ -33,6 +36,37 @@ export default class UserController {
     return res.status(201).json({
       message: 'Account Created successfully',
     })
+  }
+  static async updateUser(req: Request, res: Response) {
+    try {
+      const { id } = req.user
+      const fieldsToUpdate = req.body
+      const {username, email} = req.body
+      if (Object.keys(fieldsToUpdate).length === 0) {
+        return res.status(400).json({ message: 'nothing to update' })
+      }
+  
+      if(username || email)
+        await updateUserById({username, email}, id)
+
+      await updateUserProfileById(fieldsToUpdate, id)
+  
+      const updateduser = await getUserProfileById(id)
+      return res.status(200).json(updateduser)
+    } catch (err: unknown) {
+      const errors = err as Error
+      return res.status(500).json(errors.message)
+    }
+  }
+
+  static async getUser(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.user
+      const myprofile = await getUserProfileById(id)
+      return res.status(200).json(myprofile)
+    } catch (err: unknown) {
+      return res.status(500).json(err)
+    }
   }
 
   /**

@@ -8,8 +8,10 @@ import {
   createUser,
   getUserByRole,
   deleteUserById,
+  getUserProfileById,
 } from '../src/services/userServices'
 import User from '../src/database/models/userModel'
+import UserProfile from '../src/database/models/userProfile'
 
 chai.use(sinonChai)
 
@@ -50,6 +52,19 @@ describe('User Services', () => {
       const result = await getUserById(1)
 
       expect(findOneStub).to.have.been.calledWith({ where: { id: 1 } })
+      expect(result).to.deep.equal({ id: 1, email: 'test@example.com' })
+    })
+  })
+  describe('getUserProfileById', () => {
+    it('should return a user by id', async () => {
+      const findOneStub = sandbox.stub(UserProfile, 'findOne').resolves({
+        id: 1,
+        email: 'test@example.com',
+      } as UserProfile)
+
+      const result = await getUserProfileById(1)
+
+      expect(findOneStub).to.have.been.calledWith({ where: { userId: 1 } })
       expect(result).to.deep.equal({ id: 1, email: 'test@example.com' })
     })
   })
@@ -151,4 +166,5 @@ describe('User Services', () => {
       expect(result).to.equal(1)
     })
   })
+
 })
