@@ -22,7 +22,7 @@ const swaggerOptions: Options = {
       {
         url: `/`,
         description: 'For pull requests',
-      }
+      },
     ],
     components: {
       securitySchemes: {
