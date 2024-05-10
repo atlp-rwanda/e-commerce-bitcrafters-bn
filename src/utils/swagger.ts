@@ -1,6 +1,5 @@
 import swaggerJsdoc, { Options } from 'swagger-jsdoc'
-
-const port = process.env.PORT || 3000 // Assuming you have PORT defined somewhere
+import { PORT } from '../config'
 
 const swaggerOptions: Options = {
   swaggerDefinition: {
@@ -12,7 +11,7 @@ const swaggerOptions: Options = {
     },
     servers: [
       {
-        url: `http://localhost:${port}`,
+        url: `http://localhost:${PORT}`,
         description: 'Local Server',
       },
       {

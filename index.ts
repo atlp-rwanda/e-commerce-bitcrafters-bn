@@ -5,14 +5,14 @@ import cors from 'cors'
 import compression from 'compression'
 import dotenv from 'dotenv'
 import swaggerUi from 'swagger-ui-express'
-import specs from './src/helpers/swagger'
+import specs from './src/utils/swagger'
 import userRoute from './src/routes/userRoute'
 import loginRoute from './src/routes/loginRoute'
 import sequelizeConnection from './src/database/config/db.config' // Assuming you have a sequelize instance exported
+import { PORT } from './src/config'
 
 dotenv.config()
 
-const port = process.env.PORT || 3000
 const app: Application = express()
 
 // Serve Swagger UI
@@ -30,7 +30,7 @@ app.use('/users', userRoute)
 app.use('/users', loginRoute)
 
 const server = http.createServer(app)
-server.listen(port)
+server.listen(PORT)
 // databse connection
 sequelizeConnection.authenticate()
 export { app, server, sequelizeConnection }
