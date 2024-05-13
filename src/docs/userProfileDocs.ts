@@ -39,7 +39,7 @@
 
 /**
  * @swagger
- * /users/profile/{id}:
+ * /users/profile:
  *   get:
  *     tags: [UserProfile]
  *     responses:
@@ -56,7 +56,6 @@
  *   patch:
  *     summary: Update a User Profile
  *     tags: [UserProfile]
- *     parameters:
  *     requestBody:
  *       required: true
  *       content:

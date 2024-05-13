@@ -39,4 +39,4 @@ export const deleteUserById = (id: string) => User.destroy({ where: { id } })
 
 export const updateUserById = (fieldsToUpdate: object, id: number) => User.update(fieldsToUpdate, { where: { id } })
 
-export const updateUserProfileById = (fieldsToUpdate: object, id: number) => UserProfile.update(fieldsToUpdate, { where: { id } })
+export const updateUserProfileById = (fieldsToUpdate: object, id: number) => UserProfile.update(fieldsToUpdate, { where: { userId: id } })
