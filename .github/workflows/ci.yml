@@ -14,7 +14,9 @@ env:
   PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
   DEV_DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
   PORT: ${{ secrets.PORT }}
-
+  CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+  CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+  CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
 jobs:
   build:
     runs-on: ubuntu-latest

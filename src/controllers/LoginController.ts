@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import User from '../database/models/userModel'
 import loginSchema from '../validations/userLogin' // Import the login validation schema
 import { generateToken } from '../utils/jwt'
+import { createUserProfile } from '../services/userServices'
 
 /**
  * Controller class for managing user-related operations.
@@ -36,6 +37,8 @@ export default class LoginController {
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' })
     }
+    
+    createUserProfile(existingUser.id)
 
     const token = generateToken({
       id: existingUser.id,

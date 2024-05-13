@@ -1,5 +1,6 @@
 import { DataTypes, Model } from 'sequelize'
 import sequelizeConnection from '../config/db.config'
+import UserProfile from '../models/userProfile'
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -31,7 +32,12 @@ class User extends Model<UserAttributes> implements UserAttributes {
   public password!: string
 
   public userRole!: string
-}
+
+  public static associate() {
+    User.hasOne(UserProfile, {
+      foreignKey: 'userId',
+    });
+  }}
 
 User.init(
   {
