@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
-import User from '../database/models/userModel'
+import User, { UserRole } from '../database/models/userModel'
+
 /**
  * User Controller class
  */
@@ -32,5 +33,42 @@ export default class UserController {
     return res.status(201).json({
       message: 'Account Created successfully',
     })
+  }
+
+  /**
+   * changeUserRole method for changing user role
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
+  static async changeUserRole(req: Request, res: Response): Promise<Response> {
+    try {
+      const { userId } = req.params
+      const { newRole } = req.body
+
+      if (!userId || !newRole) {
+        return res.status(400).json({ message: 'Bad request' })
+      }
+
+      if (
+        ![UserRole.ADMIN, UserRole.BUYER, UserRole.SELLER].includes(newRole)
+      ) {
+        return res.status(400).json({ Message: 'Invalid role set', newRole })
+      }
+
+      const existingUser = await User.findOne({ where: { id: userId } })
+
+      if (!existingUser) {
+        return res.status(404).json({ message: 'User not found' })
+      }
+
+      existingUser.update({ userRole: newRole })
+      return res.status(200).json({
+        message: 'User role has been updated.',
+        existingUser,
+      })
+    } catch (error) {
+      res.status(400).json({ message: 'Error Occured', error })
+    }
   }
 }
