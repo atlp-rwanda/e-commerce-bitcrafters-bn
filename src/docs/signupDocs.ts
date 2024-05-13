@@ -76,3 +76,51 @@
  *       '500':
  *         description: Unexpected error
  */
+
+/**
+ * @swagger
+ * /users/login/verify/otp/{email}:
+ *   post:
+ *     summary: Verify OTP for two-factor authentication
+ *     description: Verifies the one-time password (OTP) provided by the user during the two-factor authentication process.
+ *     tags:
+ *       - Two-Factor Authentication
+ *     parameters:
+ *       - in: path
+ *         name: email
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The email associated with the OTP.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               otp:
+ *                 type: string
+ *                 description: The one-time password provided by the user.
+ *     responses:
+ *       '200':
+ *         description: Account authentication successful and Logged In Successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *                   description: JWT token for authentication
+ *       '400':
+ *         description: Bad request
+ *       '404':
+ *         description: OTP token not found
+ *       '406':
+ *         description: Invalid One Time Password
+ *       '500':
+ *         description: Internal server error
+ */

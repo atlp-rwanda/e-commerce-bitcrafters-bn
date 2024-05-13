@@ -74,7 +74,9 @@ after(async () => {
   if (server && server.listening) {
     await new Promise<void>((resolve, reject) => {
       server.close((err?: Error) => {
-        if (err) return reject(err)
+        if (err) {
+          return reject(err)
+        }
         resolve()
       })
     })

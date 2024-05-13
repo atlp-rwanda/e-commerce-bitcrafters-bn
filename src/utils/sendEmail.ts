@@ -1,11 +1,11 @@
 import nodemailer from 'nodemailer'
 import {
   NODEMAILER_SERVICE,
-  NODEMAILER_USER,
-  NODEMAILER_EMAIL_PORT,
   NODEMAILER_HOST,
-  NODEMAILER_SECURE,
+  NODEMAILER_USER,
   NODEMAILER_PASS,
+  NODEMAILER_EMAIL_PORT,
+  NODEMAILER_SECURE,
 } from '../config'
 
 const Mailer = async (email: string, subject: string, mail: string) => {
@@ -21,7 +21,7 @@ const Mailer = async (email: string, subject: string, mail: string) => {
       },
     })
 
-    transporter.sendMail({
+    await transporter.sendMail({
       from: process.env.NODEMAILER_USER,
       to: email,
       subject,

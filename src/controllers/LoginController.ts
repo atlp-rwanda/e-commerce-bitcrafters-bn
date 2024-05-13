@@ -1,11 +1,12 @@
 import { Request, Response } from 'express'
-import bcrypt from 'bcryptjs'
-
 import User from '../database/models/userModel'
-import loginSchema from '../validations/userLogin' // Import the login validation schema
 import { generateToken } from '../utils/jwt'
 import { createUserProfile } from '../services/userServices'
 
+import { comparePassword } from '../utils/passwords'
+import otpEmailTemplate from '../utils/otpEmailTemplate'
+import redisClient from '../utils/redisConfiguration'
+import sendMail from '../utils/sendEmail'
 /**
  * Controller class for managing user-related operations.
  */
@@ -17,33 +18,62 @@ export default class LoginController {
    * @returns {Promise<Response>} Promise that resolves to an Express response
    */
   static async login(req: Request, res: Response): Promise<Response> {
-    // Validate request body against login schema
-    const { error } = loginSchema.validate(req.body)
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message })
-    }
-
     const { email, password } = req.body
-
     const existingUser = await User.findOne({ where: { email } })
     if (!existingUser) {
       return res.status(401).json({ message: 'Invalid email or password' })
     }
+    if (existingUser.verified !== true) {
+      return res
+        .status(401)
+        .json({ message: 'Check your email and verify your account' })
+    }
 
-    const isPasswordValid = await bcrypt.compare(
+    const isPasswordValid = await comparePassword(
       password,
       existingUser.password,
     )
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' })
     }
-    
+
     createUserProfile(existingUser.id)
 
-    const token = generateToken({
+    const tokenPayload: {
+      id: number
+      userRole: string
+      email: string
+      otp?: string
+    } = {
       id: existingUser.id,
+      userRole: existingUser.userRole,
       email: existingUser.email,
-    })
-    return res.status(200).json({ jwt: token, message: 'Login successful' })
+    }
+
+    if (existingUser.userRole === 'seller') {
+      const otp = `${Math.floor(1000 + Math.random() * 9000)}`
+      const html = otpEmailTemplate(existingUser.username, otp)
+      const otptoken = generateToken({
+        id: existingUser.id,
+        email: existingUser.email,
+        otp,
+      })
+      await redisClient
+        .setEx(existingUser.email, 300, `${otp}=${otptoken}`)
+        .then(async () => {
+          await sendMail(email, 'OTP VERIFICATION CODE', html)
+        })
+
+      tokenPayload.otp = otp
+      const sellerTokenMessage =
+        'Email sent to your email. Please check your inbox messages and enter the OTP for verification'
+      return res.status(200).json({ message: sellerTokenMessage })
+    }
+
+    const token = generateToken(tokenPayload)
+    return res
+      .status(200)
+      .header('authorization', token)
+      .json({ jwt: token, message: 'Login successful' })
   }
 }
