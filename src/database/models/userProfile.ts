@@ -71,11 +71,19 @@ class UserProfile extends Model<UserProfileAttributes> implements UserProfileAtt
   public readonly createdAt!: Date
 
   public readonly updatedAt!: Date
-  
+
+  /**
+   * Associations.
+   * @returns {Object} An object representing association.
+   */
   public static associate() {
     UserProfile.belongsTo(User)
    }
 
+  /**
+   * Overrides the default toJSON method to exclude the password field.
+   * @returns {Object} An object representing the user, excluding the password.
+   */
   toJSON() {
     return {
       id: this.id,

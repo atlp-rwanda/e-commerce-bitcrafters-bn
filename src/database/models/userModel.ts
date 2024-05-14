@@ -36,6 +36,10 @@ class User extends Model<UserAttributes> implements UserAttributes {
 
   public verified: boolean
 
+  /**
+   * Associations.
+   * @returns {Object} An object representing association.
+   */
   public static associate() {
     User.hasOne(UserProfile, {
       foreignKey: 'userId',
