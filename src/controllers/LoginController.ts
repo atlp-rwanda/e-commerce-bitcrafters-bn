@@ -135,7 +135,13 @@ export default class LoginController {
         if (!user) {
           return res.status(401).json({ error: 'Authentication failed' })
         }
-        const plainUser = { ...user }
+        const plainUser = { 
+          id:user.id,
+          username:user.username,
+          email:user.email,
+          userRole:user.userRole,
+          verified:user.verified
+         }
         const token = generateToken(plainUser)
         res.status(200).json({ token })
         // res.redirect(`${FRONTEND_URL}/google?token=${token}`)

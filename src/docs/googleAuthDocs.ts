@@ -45,7 +45,7 @@
 
 /**
  * @swagger
- * /auth/google:
+ * /users/google:
  *   get:
  *     summary: Authentication via Google
  *     description: User is able to login via Google account
