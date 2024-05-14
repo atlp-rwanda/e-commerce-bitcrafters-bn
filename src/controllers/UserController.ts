@@ -2,9 +2,13 @@ import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import User, { UserRole } from '../database/models/userModel'
 import UserProfile from '../database/models/userProfile'
-import { getUserProfileById, updateUserById, updateUserProfileById } from '../services/userServices'
+import {
+  getUserProfileById,
+  updateUserById,
+  updateUserProfileById,
+} from '../services/userServices'
 
-
+import redisClient from '../utils/redisConfiguration'
 /**
  * User Controller class
  */
@@ -41,16 +45,15 @@ export default class UserController {
     try {
       const { id } = req.user
       const fieldsToUpdate = req.body
-      const {username, email} = req.body
+      const { username, email } = req.body
       if (Object.keys(fieldsToUpdate).length === 0) {
         return res.status(400).json({ message: 'nothing to update' })
       }
-  
-      if(username || email)
-        await updateUserById({username, email}, id)
+
+      if (username || email) await updateUserById({ username, email }, id)
 
       await updateUserProfileById(fieldsToUpdate, id)
-  
+
       const updateduser = await getUserProfileById(id)
       return res.status(200).json(updateduser)
     } catch (err: unknown) {
@@ -66,6 +69,33 @@ export default class UserController {
       return res.status(200).json(myprofile)
     } catch (err: unknown) {
       return res.status(500).json(err)
+    }
+  }
+
+  /**
+   * Handles OTP verification /Two factor authentication.
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
+  static async twofaVerifyOtp(req: Request, res: Response): Promise<Response> {
+    const { otp } = req.body
+    const { email } = req.params
+    try {
+      const redisResult = await redisClient.get(email)
+      if (!redisResult) {
+        return res.status(404).json({ message: 'OTP token not found' })
+      }
+      const [storedOtp, storedToken] = redisResult.split('=')
+      if (storedOtp !== otp) {
+        return res.status(406).json({ message: 'Invalid One Time Password' })
+      }
+      await redisClient.del(email)
+      return res
+        .status(200)
+        .json({ jwt: storedToken, message: 'Login successful' })
+    } catch (error) {
+      return res.status(500).json({ message: 'Internal server error' })
     }
   }
 

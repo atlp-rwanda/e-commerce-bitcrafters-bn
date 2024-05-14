@@ -17,6 +17,7 @@ export interface UserAttributes {
   email?: string
   password?: string
   userRole?: string
+  verified?: boolean
 }
 
 /**
@@ -33,11 +34,13 @@ class User extends Model<UserAttributes> implements UserAttributes {
 
   public userRole!: string
 
+  public verified: boolean
   public static associate() {
     User.hasOne(UserProfile, {
       foreignKey: 'userId',
-    });
-  }}
+    })
+  }
+}
 
 User.init(
   {
@@ -62,6 +65,10 @@ User.init(
     userRole: {
       type: DataTypes.ENUM('admin', 'seller', 'buyer'),
       defaultValue: 'buyer',
+    },
+    verified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
   },
   {

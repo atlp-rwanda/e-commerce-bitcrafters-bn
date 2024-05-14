@@ -1,3 +1,6 @@
+import dotenv from 'dotenv'
+
+dotenv.config()
 export const POSTGRES_HOST = process.env.POSTGRES_HOST
 export const DOCKER_POSTGRES_PORT = parseInt(
   process.env.DOCKER_POSTGRES_PORT,

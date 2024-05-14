@@ -1,4 +1,5 @@
 version: '2'
+
 checks:
   complex-logic:
     enabled: false
@@ -9,6 +10,10 @@ checks:
       threshold: 70
     eslint:
       enabled: true
+  return-statements:
+    enabled: true
+    config:
+      threshold: 50
   similar-code:
     config:
       threshold: 75

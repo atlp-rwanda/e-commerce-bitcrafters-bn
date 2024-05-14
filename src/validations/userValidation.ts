@@ -36,3 +36,8 @@ export const profileValidationalSchema = Joi.object({
 })
 
 export default userSchema
+const otpSchema = Joi.object({
+  otp: Joi.string().length(4).required(),
+})
+
+export { userSchema, otpSchema }

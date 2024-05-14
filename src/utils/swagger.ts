@@ -32,9 +32,9 @@ const swaggerOptions: Options = {
         },
       },
     },
-    security: [{ bearerAuth: [] as string[] }], //  define bearerAuth as an array of strings
+    security: [{ bearerAuth: [] as string[] }],
   },
-  apis: ['./src/docs/*.ts'], // Path to the files containing your route definitions
+  apis: ['./src/docs/*.ts'],
 }
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions)

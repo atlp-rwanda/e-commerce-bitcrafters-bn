@@ -1,6 +1,9 @@
 import Router from 'express'
 import UserController from '../controllers/UserController'
-import userSchema, { profileValidationalSchema } from '../validations/userValidation'
+import userSchema, {
+  profileValidationalSchema,
+  otpSchema,
+} from '../validations/userValidation'
 import validateRequest from '../utils/validateRequest'
 import { singleFileUpload } from '../middlewares/fileUpload'
 import isAuthenticated, {
@@ -15,13 +18,14 @@ router.post(
   validateRequest(userSchema, 'body'),
   UserController.signup,
 )
-router.get(
-  '/profile',isAuthenticated, UserController.getUser)
+router.get('/profile', isAuthenticated, UserController.getUser)
 
 router.patch(
-  '/profile',isAuthenticated, singleFileUpload,
+  '/profile',
+  isAuthenticated,
+  singleFileUpload,
   validateRequest(profileValidationalSchema, 'body'),
-  UserController.updateUser
+  UserController.updateUser,
 )
 
 router.post(
@@ -31,4 +35,15 @@ router.post(
   UserController.changeUserRole,
 )
 
+router.post(
+  '/changeRole/:userId',
+  isAuthenticated,
+  checkPermission(UserRole.ADMIN),
+  UserController.changeUserRole,
+)
+router.post(
+  '/login/verify/otp/:email',
+  validateRequest(otpSchema, 'body'),
+  UserController.twofaVerifyOtp,
+)
 export default router
