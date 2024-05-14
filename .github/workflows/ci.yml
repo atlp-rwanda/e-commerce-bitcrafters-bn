@@ -26,6 +26,10 @@ env:
   NODEMAILER_USER: ${{ secrets.NODEMAILER_USER }}
   NODEMAILER_PASS: ${{ secrets.NODEMAILER_PASS }}
   NODEMAILER_SECURE: ${{ secrets.NODEMAILER_SECURE }}
+  CLIENT_ID: ${{ secrets.CLIENT_ID}}
+  CLIENT_SECRET: ${{ secrets.CLIENT_SECRET}}
+  CALLBACK_URL: ${{ secrets.CALLBACK_URL}}
+
 
 jobs:
   build:

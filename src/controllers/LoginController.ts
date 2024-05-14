@@ -1,5 +1,5 @@
-import { Request, Response } from 'express'
-import User from '../database/models/userModel'
+import { Request, Response,NextFunction } from 'express'
+import User,{UserAttributes} from '../database/models/userModel'
 import { generateToken } from '../utils/jwt'
 import { createUserProfile } from '../services/userServices'
 
@@ -7,6 +7,7 @@ import { comparePassword } from '../utils/passwords'
 import otpEmailTemplate from '../utils/otpEmailTemplate'
 import redisClient from '../utils/redisConfiguration'
 import sendMail from '../utils/sendEmail'
+import passport from '../config/passport'
 /**
  * Controller class for managing user-related operations.
  */
@@ -75,5 +76,34 @@ export default class LoginController {
       .status(200)
       .header('authorization', token)
       .json({ jwt: token, message: 'Login successful' })
+  }
+
+  /** 
+   * Login method via google
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @param {NextFunction} next - Express next middleware function
+   * @returns {void}
+   */
+  static loginWithGoogle(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): void {
+    passport.authenticate(
+      'google',
+      (err: unknown, user: UserAttributes | null) => {
+        if (err) {
+          return res.status(500).json({ error: 'Internal Server Error' })
+        }
+        if (!user) {
+          return res.status(401).json({ error: 'Authentication failed' })
+        }
+        const plainUser = { ...user }
+        const token = generateToken(plainUser)
+        res.status(200).json({ token })
+        // res.redirect(`${FRONTEND_URL}/google?token=${token}`)
+      },
+    )(req, res, next)
   }
 }

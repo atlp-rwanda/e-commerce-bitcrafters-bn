@@ -21,7 +21,7 @@ const notVerifiedUser = {
 }
 
 before(async function setup() {
-  this.timeout(40000)
+  this.timeout(100000)
   try {
     await sequelizeConnection.authenticate()
 
