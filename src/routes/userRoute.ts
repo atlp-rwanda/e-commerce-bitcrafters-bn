@@ -10,6 +10,7 @@ import isAuthenticated, {
   checkPermission,
 } from '../middlewares/authenticationMiddleware'
 import { UserRole } from '../database/models/userModel'
+import paramSchema from '../validations/paramValidation'
 
 const router = Router()
 
@@ -46,4 +47,10 @@ router.post(
   validateRequest(otpSchema, 'body'),
   UserController.twofaVerifyOtp,
 )
+router.get(
+  '/verify/:token',
+  validateRequest(paramSchema, 'params'),
+  UserController.verifyEmail,
+)
+
 export default router

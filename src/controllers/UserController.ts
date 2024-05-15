@@ -6,8 +6,19 @@ import {
   getUserProfileById,
   updateUserById,
   updateUserProfileById,
+  getUserById,
 } from '../services/userServices'
 
+import {
+  validateAndRetrieveToken,
+  deleteTokenByUserId,
+} from '../services/tokenServices'
+import { hashPassword } from '../utils/passwords'
+import { generateToken } from '../utils/jwt'
+import { verificationsEmailTemplate } from '../utils/emailTemplates'
+import Token from '../database/models/tokenModel'
+import sendMail from '../utils/sendEmail'
+import { NODEMAILER_BASE_URL } from '../config'
 import redisClient from '../utils/redisConfiguration'
 /**
  * User Controller class
@@ -20,27 +31,91 @@ export default class UserController {
    * @returns {Promise<Response>} Promise that resolves to an Express response
    */
   static async signup(req: Request, res: Response): Promise<Response> {
-    const salt = await bcrypt.genSalt(10)
-    const hashedpassword = await bcrypt.hash(req.body.password, salt)
+    try {
+      const { email, password, username } = req.body
+      const existingUser = await User.findOne({ where: { email } })
+      if (existingUser) {
+        return res.status(409).json({
+          message: 'This user already exists',
+        })
+      }
+      const hashedpassword = hashPassword(password)
 
-    const { email } = req.body
-    const existingUser = await User.findOne({ where: { email } })
-    if (existingUser) {
-      return res.status(409).json({
-        message: 'This user already exists',
+      const newUser = new User({
+        username,
+        email,
+        password: (await hashedpassword).toString(),
+        verified: false,
       })
-    }
-    const newUser = new User({
-      username: req.body.username,
-      email: req.body.email,
-      password: hashedpassword,
-    })
 
-    await newUser.save()
-    return res.status(201).json({
-      message: 'Account Created successfully',
-    })
+      await newUser.save()
+
+      const token = generateToken({
+        id: newUser.id,
+        email: newUser.email,
+        username: newUser.username,
+      })
+      const baseUrl = `${NODEMAILER_BASE_URL}users/verify/${token}`
+
+      const html = verificationsEmailTemplate(newUser.username, baseUrl)
+
+      Promise.all([
+        await sendMail(email, 'Verify Account', html),
+        await Token.create({
+          userId: newUser.id,
+          token,
+        }),
+      ])
+
+      return res.status(201).json({
+        message: 'Account Created successfully, verify your email to continue',
+      })
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error', error })
+    }
   }
+
+  /**
+   * verifyEmail method for verifying a user
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
+  static async verifyEmail(req: Request, res: Response): Promise<Response> {
+    try {
+      const { token } = req.params
+
+      const decodedToken = await validateAndRetrieveToken(token)
+
+      if (!decodedToken) {
+        return res.status(401).send({ message: 'Invalid token' })
+      }
+
+      const user = await getUserById(decodedToken.id)
+
+      if (!user) {
+        return res
+          .status(400)
+          .send({ message: 'Invalid token or user not found' })
+      }
+
+      await Promise.all([
+        user.update({ verified: true }),
+        deleteTokenByUserId(decodedToken.id),
+      ])
+
+      res.status(201).send({ message: 'Email verified successfully' })
+    } catch (error) {
+      res.status(500).send({ message: 'Internal server error' })
+    }
+  }
+
+  /**
+   * updateUser method for updating user information
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
   static async updateUser(req: Request, res: Response) {
     try {
       const { id } = req.user
@@ -51,7 +126,6 @@ export default class UserController {
       }
 
       if (username || email) await updateUserById({ username, email }, id)
-
       await updateUserProfileById(fieldsToUpdate, id)
 
       const updateduser = await getUserProfileById(id)
@@ -62,6 +136,12 @@ export default class UserController {
     }
   }
 
+  /**
+   * getUser method for getting user profile
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
   static async getUser(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.user

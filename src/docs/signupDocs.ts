@@ -1,6 +1,11 @@
 /**
  * @swagger
  * components:
+ *   securitySchemes:
+ *      bearerAuth:
+ *          type: http
+ *          scheme: bearer
+ *          bearerFormat: JWT
  *   schemas:
  *     userModel:
  *       type: object
@@ -17,6 +22,9 @@
  *         userRole:
  *           type: string
  *           description: Role of the user
+ *         verified:
+ *           type: boolean
+ *           description: Indicates if a user is verified
  *           enum:
  *             - admin
  *             - seller
@@ -39,7 +47,7 @@
  *     summary: Create a new user
  *     description: Creates a new user
  *     tags:
- *       - SIGNUP
+ *       [SIGNUP]
  *     requestBody:
  *       description: User object to be created
  *       required: true
@@ -123,4 +131,40 @@
  *         description: Invalid One Time Password
  *       '500':
  *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /users/verify/{token}:
+ *   get:
+ *     summary: Verifies a user
+ *     description: Verifies a user's account through their email using a verification token.
+ *     tags:
+ *       - AUTHENTICATION
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Token to be verified
+ *     responses:
+ *       '201':
+ *         description: A successful response indicating user verification.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *       '400':
+ *         description: Invalid Token
+ *       '404':
+ *         description: User Not Found
+ *       '500':
+ *         description: Unexpected error
  */
