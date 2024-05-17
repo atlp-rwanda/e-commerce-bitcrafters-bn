@@ -10,11 +10,13 @@ import userRoute from './src/routes/userRoute'
 import loginRoute from './src/routes/loginRoute'
 import sequelizeConnection from './src/database/config/db.config' // Assuming you have a sequelize instance exported
 import { PORT } from './src/config'
+import passport from './src/config/passport'
 
 dotenv.config()
 
 const app: Application = express()
 
+app.use(passport.initialize())
 // Serve Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
