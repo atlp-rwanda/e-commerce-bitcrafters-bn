@@ -18,6 +18,7 @@ export interface UserAttributes {
   password?: string
   userRole?: string
   verified?: boolean
+  status?: string
 }
 
 /**
@@ -36,10 +37,13 @@ class User extends Model<UserAttributes> implements UserAttributes {
 
   public verified: boolean
 
+  public status!: string
+
   /**
    * Associations.
    * @returns {Object} An object representing association.
    */
+
   public static associate() {
     User.hasOne(UserProfile, {
       foreignKey: 'userId',
@@ -74,6 +78,10 @@ User.init(
     verified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+    status: {
+      type: DataTypes.ENUM('active', 'inactive'),
+      defaultValue: 'active',
     },
   },
   {

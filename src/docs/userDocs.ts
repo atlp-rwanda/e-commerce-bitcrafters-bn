@@ -5,7 +5,7 @@
  *     summary: Changes Role of a user
  *     description: An Admin can be able to change role of someone
  *     tags:
- *       - [USERS]
+ *       - USERS
  *     requestBody:
  *       description: New user ROle to set
  *       required: true
