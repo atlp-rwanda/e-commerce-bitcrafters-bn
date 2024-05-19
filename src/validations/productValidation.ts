@@ -11,3 +11,6 @@ const productSchema = Joi.object({
 })
 
 export default productSchema
+export const productStatusSchema = Joi.object({
+  productStatus: Joi.string().valid('available', 'unavailable').required(),
+})
