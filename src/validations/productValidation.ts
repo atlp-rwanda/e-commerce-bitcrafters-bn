@@ -14,3 +14,7 @@ export default productSchema
 export const productStatusSchema = Joi.object({
   productStatus: Joi.string().valid('available', 'unavailable').required(),
 })
+export const reviewsValidationSchema = Joi.object({
+  rating: Joi.number().min(0).max(5).required(),
+  feedback: Joi.string().min(3).max(300).optional(),
+});
