@@ -9,6 +9,7 @@ import 'express-async-errors'
 import specs from './src/utils/swagger'
 import userRoute from './src/routes/userRoute'
 import loginRoute from './src/routes/loginRoute'
+import productRoute from './src/routes/productRoute'
 import sequelizeConnection from './src/database/config/db.config' // Assuming you have a sequelize instance exported
 import { PORT } from './src/config'
 import passport from './src/config/passport'
@@ -32,6 +33,7 @@ app.get('/', (req: Request, res: Response) => {
 })
 app.use('/users', userRoute)
 app.use('/users', loginRoute)
+app.use('/collections', productRoute)
 
 app.use(notFoundHandler)
 

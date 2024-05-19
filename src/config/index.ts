@@ -33,3 +33,6 @@ export const REDIS_PASSWORD = process.env.REDIS_PASSWORD
 export const REDIS_HOST = process.env.REDIS_HOST
 export const REDIS_PORT = parseInt(process.env.REDIS_PORT, 10)
 export const SLAT_ROUNDS = parseInt(process.env.SLAT_ROUND, 10) || 10
+export const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME
+export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY
+export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET
