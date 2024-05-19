@@ -10,8 +10,17 @@ import {
   deleteUserById,
   getUserProfileById,
 } from '../src/services/userServices'
+import {
+  getTokenById,
+  getTokenByTokenValue,
+  deleteTokenByTokenValue,
+  deleteTokenByUserId,
+  createToken,
+  getTokenByUserId,
+} from '../src/services/tokenServices'
 import User from '../src/database/models/userModel'
 import UserProfile from '../src/database/models/userProfile'
+import Token from '../src/database/models/tokenModel'
 
 chai.use(sinonChai)
 
@@ -166,5 +175,120 @@ describe('User Services', () => {
       expect(result).to.equal(1)
     })
   })
+})
 
+describe('Token Services', () => {
+  let sandbox: sinon.SinonSandbox
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox()
+  })
+
+  afterEach(() => {
+    sandbox.restore()
+  })
+
+  describe('getTokenByTokenValue', () => {
+    it('should return a token by token value', async () => {
+      const findOneStub = sandbox.stub(Token, 'findOne').resolves({
+        id: 1,
+        userId: 1,
+        token: 'my_token',
+      } as Token)
+
+      const result = await getTokenByTokenValue('my_token')
+
+      expect(findOneStub).to.have.been.calledWith({
+        where: { token: 'my_token' },
+      })
+      expect(result).to.deep.equal({ id: 1, token: 'my_token', userId: 1 })
+    })
+  })
+
+  describe('getTokenByUserId', () => {
+    it('should return a token by user id', async () => {
+      const findOneStub = sandbox.stub(Token, 'findOne').resolves({
+        id: 1,
+        userId: 1,
+        token: 'my_token',
+      } as Token)
+
+      const result = await getTokenByUserId(1)
+
+      expect(findOneStub).to.have.been.calledWith({ where: { userId: 1 } })
+      expect(result).to.deep.equal({
+        id: 1,
+        userId: 1,
+        token: 'my_token',
+      })
+    })
+  })
+
+  describe('getTokenById', () => {
+    it('should return a token by user id', async () => {
+      const findOneStub = sandbox.stub(Token, 'findOne').resolves({
+        id: 1,
+        userId: 1,
+        token: 'my_token',
+      } as Token)
+
+      const result = await getTokenById(1)
+
+      expect(findOneStub).to.have.been.calledWith({ where: { id: 1 } })
+      expect(result).to.deep.equal({
+        id: 1,
+        userId: 1,
+        token: 'my_token',
+      })
+    })
+  })
+
+  describe('createToken', () => {
+    it('should create a new token', async () => {
+      const createStub = sandbox.stub(Token, 'create').resolves({
+        id: 1,
+        userId: 1,
+        token: 'my_token',
+      } as Token)
+
+      const details = {
+        id: 1,
+        userId: 1,
+        token: 'my_token',
+      }
+
+      const result = await createToken(details)
+
+      expect(createStub).to.have.been.calledWith(details)
+      expect(result).to.deep.equal({
+        id: 1,
+        userId: 1,
+        token: 'my_token',
+      })
+    })
+  })
+
+  describe('deleteTokenById', () => {
+    it('should delete a token by id', async () => {
+      const destroyStub = sandbox.stub(Token, 'destroy').resolves(1)
+
+      const result = await deleteTokenByUserId(1)
+
+      expect(destroyStub).to.have.been.calledWith({ where: { userId: 1 } })
+      expect(result).to.equal(1)
+    })
+  })
+
+  describe('deleteTokenByTokenValue', () => {
+    it('should delete a token by id', async () => {
+      const destroyStub = sandbox.stub(Token, 'destroy').resolves(1)
+
+      const result = await deleteTokenByTokenValue('token_value')
+
+      expect(destroyStub).to.have.been.calledWith({
+        where: { token: 'token_value' },
+      })
+      expect(result).to.equal(1)
+    })
+  })
 })

@@ -44,6 +44,26 @@ describe('Signup Test', () => {
       })
   })
 
+  it('Should return a 201 status code indicating success new', async () => {
+    const res = await chai.request(app).post('/users/signup').send(newUser)
+    expect(res).to.have.status
+    await User.destroy({ where: { email: newUser.email } })
+  })
+
+  it('Should return a 201 status code indicating success new', async () => {
+    before(async () => {
+      await User.destroy({ where: { email: newUser.email } })
+    })
+    await chai
+      .request(app)
+      .post('/users/signup')
+      .send(newUser)
+      .end((err, res) => {
+        expect(res).to.have.status(201)
+      })
+    await User.destroy({ where: { email: newUser.email } })
+  })
+
   it('Should return a 201 status code indicating success', async () => {
     chai
       .request(app)

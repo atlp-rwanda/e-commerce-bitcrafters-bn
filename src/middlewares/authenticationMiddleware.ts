@@ -32,7 +32,7 @@ const isAuthenticated = async (
     res.locals.decoded = user
     next()
   } catch (error) {
-    res.status(500).json({ message: 'Internal server down' })
+    res.status(500).json({ message: 'Internal server down' , error: error.message})
   }
 }
 

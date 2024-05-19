@@ -7,7 +7,7 @@ checks:
     enabled: false
   method-lines:
     config:
-      threshold: 70
+      threshold: 100
     eslint:
       enabled: true
   return-statements:

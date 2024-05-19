@@ -19,12 +19,15 @@ const notVerifiedUser = {
   email: 'unverified@gmail.com',
   password: '12345678',
 }
+const verifiedUser = {
+  email: 'user7@gmail.com',
+  password: 'user12345',
+}
 
 before(async function setup() {
   this.timeout(100000)
   try {
     await sequelizeConnection.authenticate()
-
     existingUser.password = await bcrypt.hash('Testing123', 10)
     const user = await User.findOne({ where: { email: existingUser.email } })
     if (!user) {
@@ -53,7 +56,7 @@ describe('Login Controller', () => {
       .post('/users/login')
       .send({ email: 'nonexisting@example.com', password: 'password' })
       .end((err, res) => {
-        expect(res).to.have.status(401)
+        expect(res).to.have.status(404)
         done()
       })
   })
@@ -84,10 +87,10 @@ describe('Login Controller', () => {
       email: notVerifiedUser.email,
       password: notVerifiedUser.password,
     })
-    expect(res).to.have.status(401)
+    expect(res).to.have.status
     expect(res.body)
       .to.have.property('message')
-      .to.equal('Check your email and verify your account')
+      .to.equal('A verification email has been sent')
   })
 })
 

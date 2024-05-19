@@ -5,7 +5,6 @@ const userSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string()
     .min(8)
-    .alphanum()
     .pattern(/^[a-zA-Z0-9]+$/)
     .required(),
 })
@@ -16,7 +15,6 @@ export const profileValidationalSchema = Joi.object({
   profileImageUrl: Joi.string().optional(),
   password: Joi.string()
     .min(8)
-    .alphanum()
     .pattern(/^[a-zA-Z0-9]+$/)
     .optional(),
   gender: Joi.string().valid('male', 'female').optional(),
