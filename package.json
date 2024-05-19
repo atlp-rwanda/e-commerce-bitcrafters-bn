@@ -13,7 +13,8 @@
     "down": "sequelize-cli db:migrate:undo:all",
     "seed": "sequelize-cli db:seed:all",
     "prepare": "husky",
-    "lint": "eslint **/*.ts --fix"
+    "lint": "eslint **/*.ts",
+    "lint:fix":" eslint */.ts --fix"
   },
   "keywords": [],
   "author": "",

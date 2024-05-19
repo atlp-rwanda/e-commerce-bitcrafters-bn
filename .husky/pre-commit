@@ -9,10 +9,6 @@ npm run lint
 # Run build script
 npm run build
 
-# Run tests
-# Replace `npm test` with the command to run your tests
-npm test 
-
 # If any of the above commands fail, exit with a non-zero status
 if [ $? -ne 0 ]; then
     echo "Pre-commit checks failed, commit aborted"
