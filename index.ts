@@ -5,12 +5,14 @@ import cors from 'cors'
 import compression from 'compression'
 import dotenv from 'dotenv'
 import swaggerUi from 'swagger-ui-express'
+import 'express-async-errors'
 import specs from './src/utils/swagger'
 import userRoute from './src/routes/userRoute'
 import loginRoute from './src/routes/loginRoute'
 import sequelizeConnection from './src/database/config/db.config' // Assuming you have a sequelize instance exported
 import { PORT } from './src/config'
 import passport from './src/config/passport'
+import { ErrorHandler, notFoundHandler } from './src/utils/errorHandler'
 
 dotenv.config()
 
@@ -30,6 +32,10 @@ app.get('/', (req: Request, res: Response) => {
 })
 app.use('/users', userRoute)
 app.use('/users', loginRoute)
+
+app.use(notFoundHandler)
+
+app.use(ErrorHandler)
 
 const server = http.createServer(app)
 server.listen(PORT)
