@@ -7,4 +7,11 @@ const paramSchema = Joi.object({
   }),
 })
 
+export const paramIdSchema = Joi.object({
+  productId: Joi.string().guid().required().messages({
+    'string.empty': 'id must not be empty',
+    'any.required': 'id is required',
+  }),
+})
+
 export default paramSchema
