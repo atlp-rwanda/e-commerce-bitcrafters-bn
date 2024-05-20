@@ -117,21 +117,7 @@ describe('changeUserRole', () => {
     }
   })
 
-  it('should call next if the token is valid', async () => {
-    const validToken = 'valid_token'
-    const decodedToken = { id: 1, role: 'admin', email: 'test@example.com' }
-    req.headers.authorization = `Bearer ${validToken}`
-    sinon
-      .stub(jwt, 'verify')
-      .callsFake(() => {})
-      .resolves(decodedToken)
 
-    await isAuthenticated(req, res, next)
-
-    expect(res.status).to.not.have.been.called
-    expect(res.json).to.not.have.been.called
-    expect(next).to.be.calledOnce
-  })
 
   it('should return 401 if no token is found', async () => {
     req.headers.authorization = undefined

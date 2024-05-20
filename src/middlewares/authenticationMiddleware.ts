@@ -28,11 +28,16 @@ const isAuthenticated = async (
 
     const payload = await decodeToken(token)
     const user = await getUserById(payload.id)
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' })
+      }
     req.user = user
     res.locals.decoded = user
     next()
   } catch (error) {
-    res.status(500).json({ message: 'Internal server down' , error: error.message})
+    res
+      .status(500)
+      .json({ message: 'Internal server down', error: error.message })
   }
 }
 
@@ -48,4 +53,4 @@ export const checkPermission =
       return next()
     }
     return res.status(401).json({ code: 401, message: 'Unauthorized' })
-  }
+    }

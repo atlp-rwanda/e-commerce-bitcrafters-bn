@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction  } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import { verificationsEmailTemplate } from '../utils/emailTemplates'
-import User, { UserRole , UserAttributes} from '../database/models/userModel'
+import User, { UserRole, UserAttributes } from '../database/models/userModel'
 import loginSchema from '../validations/userLogin'
 import { generateToken } from '../utils/jwt'
 import { createUserProfile } from '../services/userServices'
@@ -80,8 +80,8 @@ export default class LoginController {
         id: existingUser.id,
         userRole: existingUser.userRole,
         email: existingUser.email,
-        otp: '', 
-      };
+        otp: '',
+      }
 
       if (existingUser.userRole === UserRole.SELLER) {
         const otp = `${Math.floor(1000 + Math.random() * 9000)}`
@@ -104,7 +104,8 @@ export default class LoginController {
       }
 
       // Generate and return JWT token for authenticated user
-      const authToken = generateToken({ tokenPayload })
+      const authToken = generateToken(tokenPayload )
+      redisClient.setEx(`user:${existingUser.id}`, 86400, authToken)
       return res.status(200).send({ message: 'Login successful', authToken })
     } catch (error) {
       return res
@@ -113,7 +114,7 @@ export default class LoginController {
     }
   }
 
-  /** 
+  /**
    * Login method via google
    * @param {Request} req - Express request object
    * @param {Response} res - Express response object
@@ -140,5 +141,24 @@ export default class LoginController {
         // res.redirect(`${FRONTEND_URL}/google?token=${token}`)
       },
     )(req, res, next)
+  }
+
+  /**
+   * Handles user logout
+   * @param {AuthenticatedRequest} req - Express request object with user property
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
+  static async logOut(req: Request, res: Response): Promise<Response> {
+    const userId = req.user.id
+    const tokenKey = `user:${userId}`
+    const tokenExists = await redisClient.exists(tokenKey)
+
+    if (tokenExists) {
+      await redisClient.del(tokenKey)
+      res.removeHeader('authorization')
+      return res.status(200).json({ message: 'Logout successfully' })
+    }
+    return res.status(401).json({ message: 'Already logged out' })
   }
 }
