@@ -21,4 +21,5 @@ dist
 .vscode
 
 
-uploads/* 
+uploads/*
+!uploads/.gitkeep
