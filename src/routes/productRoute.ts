@@ -7,15 +7,15 @@ import productSchema, {
 import collectionSchema from '../validations/collectionValidation'
 import isAuthenticated, {
   checkPermission,
-  excludePermission,
+  excludePermission
 } from '../middlewares/authenticationMiddleware'
 import productController from '../controllers/productController'
 import { UserRole } from '../database/models/userModel'
-import  paramSchema,{ paramIdSchema } from '../validations/paramValidation'
-
+import paramSchema,{ paramIdSchema } from '../validations/paramValidation'
+import multer from 'multer'
 
 const router = express.Router()
-
+const upload = multer()
 router.post(
   '/:id/product',
   isAuthenticated,
@@ -71,6 +71,32 @@ router.get(
   isAuthenticated,
   checkPermission(UserRole.SELLER),
   productController.listCollectionProducts,
+)
+
+router.get(
+  '/product',
+  isAuthenticated,
+  checkPermission(UserRole.SELLER),
+  productController.getProducts,
+)
+router.put(
+  '/:id/product',
+  isAuthenticated,
+  checkPermission(UserRole.SELLER),
+  productController.updateProduct,
+)
+router.delete(
+  '/:id/images',
+  isAuthenticated,
+  checkPermission(UserRole.SELLER),
+  productController.removeImages
+)
+router.post(
+  '/:id/images',
+  isAuthenticated,
+  checkPermission(UserRole.SELLER),
+  upload.array('images'),
+  productController.addImages
 )
 
 export default router
