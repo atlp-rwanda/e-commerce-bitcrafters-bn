@@ -14,7 +14,7 @@
     "seed": "sequelize-cli db:seed:all",
     "prepare": "husky",
     "lint": "eslint **/*.ts",
-    "lint:fix":" eslint */.ts --fix"
+    "lint:fix": " eslint */.ts --fix"
   },
   "keywords": [],
   "author": "",

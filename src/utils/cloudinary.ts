@@ -22,7 +22,6 @@ export const cloudinaryUpload = async (
     const tempFilePath = path.join(os.tmpdir(), fileName)
 
     fs.writeFile(tempFilePath, buffer, (writeError) => {
-
       cloudinary.uploader.upload(
         tempFilePath,
         (

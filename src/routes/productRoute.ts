@@ -1,7 +1,9 @@
 import express from 'express'
 import configureMulter from '../middlewares/multer'
 import validateRequest from '../utils/validateRequest'
-import productSchema from '../validations/productValidation'
+import productSchema, {
+  productStatusSchema,
+} from '../validations/productValidation'
 import collectionSchema from '../validations/collectionValidation'
 import isAuthenticated, {
   checkPermission,
@@ -22,7 +24,16 @@ router.post(
 router.post(
   '/collection',
   isAuthenticated,
-  checkPermission(UserRole.SELLER), validateRequest(collectionSchema, 'body'),
+  checkPermission(UserRole.SELLER),
+  validateRequest(collectionSchema, 'body'),
   productController.createCollection,
 )
+router.patch(
+  '/product/:productId/status',
+  isAuthenticated,
+  checkPermission(UserRole.SELLER),
+  validateRequest(productStatusSchema, 'body'),
+  productController.changeProductStatus,
+)
+
 export default router

@@ -19,7 +19,7 @@ module.exports = {
       {
         id: collectionId,
         name: 'Electronics',
-        sellerId:1182,
+        sellerId: 1182,
         createdAt: new Date(2000),
         updatedAt: new Date(2000),
       },

@@ -7,7 +7,7 @@ import {
 } from '../config/index'
 import Product from '../database/models/productModel'
 import Collection from '../database/models/collectionModel'
-
+import { getProductById } from '../services/productServices'
 cloudinary.v2.config({
   cloud_name: CLOUDINARY_CLOUD_NAME,
   api_key: CLOUDINARY_API_KEY,
@@ -26,22 +26,15 @@ export default class productController {
    */
   static async addProduct(req: Request, res: Response): Promise<Response> {
     try {
-      const {
-        name,
-        price,
-        category,
-        bonus,
-        sku,
-        quantity,
-        expiryDate,
-      } = req.body
+      const { name, price, category, bonus, sku, quantity, expiryDate } =
+        req.body
 
-      const collectionId = req.params.id;
+      const collectionId = req.params.id
       const sellerId = req.user?.id
 
-      const collection = await Collection.findByPk(collectionId);
+      const collection = await Collection.findByPk(collectionId)
       if (!collection) {
-        return res.status(404).json({ message: 'Collection not found' });
+        return res.status(404).json({ message: 'Collection not found' })
       }
 
       const existingProduct = await Product.findOne({
@@ -53,12 +46,12 @@ export default class productController {
         })
       }
 
-      const files = req.files as Express.Multer.File[];
+      const files = req.files as Express.Multer.File[]
       if (!files || files.length === 0) {
-        return res.status(400).json({ message: 'Images are required' });
+        return res.status(400).json({ message: 'Images are required' })
       }
       if (files.length < 4 || files.length > 8) {
-        return res.status(400).json({ message: 'Please upload 4 to 8 images' });
+        return res.status(400).json({ message: 'Please upload 4 to 8 images' })
       }
 
       const uploadedImages = await Promise.all(
@@ -105,11 +98,11 @@ export default class productController {
       const { name, description } = req.body
       const sellerId = req.user?.id
 
-      const collection = await Collection.create({ 
+      const collection = await Collection.create({
         name,
         description,
-        sellerId
-       })
+        sellerId,
+      })
 
       return res
         .status(201)
@@ -117,5 +110,45 @@ export default class productController {
     } catch (error) {
       return res.status(500).json({ message: 'Internal server error' })
     }
+  }
+  /**
+   * seller can mark product status as availbale or unavailable
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
+  static async changeProductStatus(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
+    const sellerId = req.user.id
+    const productId = req.params.productId
+    const { productStatus } = req.body
+    const product = await getProductById(sellerId, productId)
+
+    if (!product) {
+      return res.status(404).json({
+        error:
+          'Product not found or you are not authorized to update this product',
+      })
+    }
+
+    const currentDate = new Date()
+    if (
+      (product.quantity === 0 || product.expiryDate < currentDate) &&
+      productStatus === 'available'
+    ) {
+      return res.status(400).json({
+        error:
+          'Product cannot be marked as available. May be the quantity is zero or the product has expired.',
+      })
+    }
+    const updatedProduct = await product.update({
+      productStatus: productStatus,
+    })
+    return res.status(200).json({
+      data: updatedProduct,
+      message: `Product updated as ${productStatus}`,
+    })
   }
 }
