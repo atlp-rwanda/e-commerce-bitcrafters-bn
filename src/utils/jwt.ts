@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { JWT_SECRET, JWT_EXPIRE_TIME } from '../config/index'
+import { JWT_SECRET, JWT_EXPIRE_TIME, JWT_SECRET_RESET } from '../config/index'
 import { UserAttributes } from '../database/models/userModel'
 
 interface JwtPayload extends UserAttributes {
@@ -16,3 +16,10 @@ export const generateToken = (data: object) => {
 
 export const decodeToken: (token: string) => JwtPayload = (token: string) =>
   jwt.verify(token, JWT_SECRET) as JwtPayload
+
+export const generateResetToken = (data: object) => {
+  const token = jwt.sign(data, JWT_SECRET_RESET, {
+    expiresIn: JWT_EXPIRE_TIME,
+  })
+  return token
+}

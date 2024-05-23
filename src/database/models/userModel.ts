@@ -1,6 +1,6 @@
-import { DataTypes, Model } from 'sequelize';
-import sequelizeConnection from '../config/db.config';
-import UserProfile from '../models/userProfile';
+import { DataTypes, Model } from 'sequelize'
+import sequelizeConnection from '../config/db.config'
+import UserProfile from '../models/userProfile'
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -24,7 +24,7 @@ export interface UserAttributes {
  * Represents a user in the databases.
  */
 class User extends Model<UserAttributes> implements UserAttributes {
-  public id!:number
+  public id!: number
 
   public username!: string
 
@@ -32,7 +32,7 @@ class User extends Model<UserAttributes> implements UserAttributes {
 
   public password!: string
 
-  public userRole!: string 
+  public userRole!: string
 
   public verified: boolean
 
@@ -78,6 +78,6 @@ User.init(
     tableName: 'Users',
     timestamps: true,
   },
-);
+)
 
-export default User;
+export default User

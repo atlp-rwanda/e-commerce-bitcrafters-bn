@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
-import bcrypt from 'bcryptjs'
 import User, { UserRole } from '../database/models/userModel'
-import UserProfile from '../database/models/userProfile'
+
 import {
   getUserProfileById,
   updateUserById,
@@ -12,9 +11,10 @@ import {
 import {
   validateAndRetrieveToken,
   deleteTokenByUserId,
+  validateRedisToken,
 } from '../services/tokenServices'
 import { hashPassword } from '../utils/passwords'
-import { generateToken } from '../utils/jwt'
+import { generateResetToken, generateToken } from '../utils/jwt'
 import { verificationsEmailTemplate } from '../utils/emailTemplates'
 import Token from '../database/models/tokenModel'
 import sendMail from '../utils/sendEmail'
@@ -213,6 +213,71 @@ export default class UserController {
       })
     } catch (error) {
       res.status(400).json({ message: 'Error Occured', error })
+    }
+  }
+  static async resetPasswordLink(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
+    try {
+      const { email } = req.body
+      const user = await User.findOne({ where: { email } })
+
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' })
+      }
+
+      const token = generateResetToken({
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      })
+
+      const resetLink = `${NODEMAILER_BASE_URL}/users/reset-password/${token}`
+
+      const msg = {
+        to: user.email,
+        subject: 'Password Reset Request',
+        html: `<strong>Click on the link to reset your password: <a href="${resetLink}">RESET PASSWORD</a></strong>`,
+      }
+
+      await redisClient.setEx(token, 3000, token)
+      await sendMail(msg.to, msg.subject, msg.html)
+      return res.status(200).json({ message: 'Password reset email sent' })
+    } catch (error) {
+      return res.status(500).json({ error: error.message })
+    }
+  }
+
+  static async newPassword(req: Request, res: Response): Promise<Response> {
+    try {
+      const { token } = req.params
+      const { password } = req.body
+
+      const redisToken = await redisClient.get(token)
+      if (!redisToken) {
+        return res.status(404).json({ message: 'Token not found or expired' })
+      }
+
+      const decodedToken = await validateRedisToken(redisToken)
+
+      if (!decodedToken) {
+        return res.status(401).json({ message: 'Invalid token' })
+      }
+      const user = await getUserById(decodedToken.id)
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' })
+      }
+
+      const hashedPassword = await hashPassword(password)
+      await user.update({ password: hashedPassword })
+      await redisClient.del(token)
+
+      return res
+        .status(200)
+        .json({ message: 'Password has been successfully reset' })
+    } catch (error) {
+      return res.status(500).json({ message: 'Internal server error' })
     }
   }
 }

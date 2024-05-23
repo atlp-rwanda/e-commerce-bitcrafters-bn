@@ -37,5 +37,13 @@ export default userSchema
 const otpSchema = Joi.object({
   otp: Joi.string().length(4).required(),
 })
-
-export { userSchema, otpSchema }
+const resetPasswordsLinkSchema = Joi.object({
+  email: Joi.string().email().required(),
+})
+const newPasswordSchema = Joi.object({
+  password: Joi.string()
+    .min(8)
+    .pattern(/^[a-zA-Z0-9]+$/)
+    .required(),
+})
+export { userSchema, otpSchema, resetPasswordsLinkSchema, newPasswordSchema }
