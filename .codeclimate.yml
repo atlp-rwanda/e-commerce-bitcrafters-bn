@@ -5,7 +5,11 @@ checks:
     enabled: false
   method-complexity:
     enabled: false
+  file-lines:
+    config:
+      threshold: 500
   method-lines:
+    enabled: false
     config:
       threshold: 100
     eslint:

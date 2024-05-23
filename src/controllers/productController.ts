@@ -262,6 +262,66 @@ export default class productController {
   }
 
 
+  /**
+   * List products
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
+  static async listProducts(req: Request, res: Response): Promise<Response> {
+    try {
+      const user = req.user
+      const page: number =
+        Number.parseInt(req.query.page as unknown as string, 10) || 1
+      const limit: number =
+        Number.parseInt(req.query.limit as unknown as string, 10) || 5
+
+      if (
+        Number.isNaN(page) ||
+        Number.isNaN(limit) ||
+        page <= 0 ||
+        limit <= 0
+      ) {
+        return res
+          .status(400)
+          .json({ message: 'Invalid pagination parameters' })
+      }
+
+      const offset = (page - 1) * limit
+      const currentDate = moment().format('YYYY-MM-DD HH:mm:ssZ')
+      const totalCount: number = await getProductCount()
+      const totalPages = Math.ceil(totalCount / limit)
+
+      const products =
+        user.userRole === 'buyer'
+          ? await Product.findAll({
+              where: {
+                productStatus: 'available',
+                expiryDate: {
+                  [Op.gt]: currentDate,
+                },
+              },
+              offset,
+              limit,
+            })
+          : await Product.findAll({
+              where: {},
+              offset,
+              limit,
+            })
+
+      return res.status(200).json({
+        message: 'Products retrieved successfully',
+        products,
+        pagination: { limit, page, totalPages },
+      })
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: 'Internal server error', error: error.message })
+    }
+  }
+  
 /**
    * List products
    * @param {Request} req - Express request object
