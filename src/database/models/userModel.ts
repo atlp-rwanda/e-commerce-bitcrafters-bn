@@ -1,6 +1,7 @@
-import { DataTypes, Model } from 'sequelize'
-import sequelizeConnection from '../config/db.config'
-import UserProfile from '../models/userProfile'
+import { DataTypes, Model } from 'sequelize';
+import sequelizeConnection from '../config/db.config';
+import UserProfile from '../models/userProfile';
+import Wishlist from './wishlistModel';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -48,6 +49,7 @@ class User extends Model<UserAttributes> implements UserAttributes {
     User.hasOne(UserProfile, {
       foreignKey: 'userId',
     })
+    User.hasOne(Wishlist, { foreignKey: 'buyerId'});
   }
 }
 
