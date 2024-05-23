@@ -15,3 +15,9 @@ export const getProductById = async (sellerId: number, productId: string) => {
   const product = await Product.findOne(query)
   return product
 }
+
+export const deleteProductById = (sellerId: number, itemId: string) => {
+    const querySearch =createProductQuery(sellerId, itemId)
+    const productToDelete = Product.destroy(querySearch)
+    return productToDelete
+}

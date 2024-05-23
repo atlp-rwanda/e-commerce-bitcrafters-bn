@@ -7,7 +7,8 @@ import {
 } from '../config/index'
 import Product from '../database/models/productModel'
 import Collection from '../database/models/collectionModel'
-import { getProductById } from '../services/productServices'
+import { deleteProductById, getProductById } from '../services/productServices'
+
 cloudinary.v2.config({
   cloud_name: CLOUDINARY_CLOUD_NAME,
   api_key: CLOUDINARY_API_KEY,
@@ -151,4 +152,28 @@ export default class productController {
       message: `Product updated as ${productStatus}`,
     })
   }
+
+  /**
+   * delete product
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   */
+  static async deleteProduct(req: Request, res: Response) {
+    try {
+      const productId = req.params.productId;
+      const sellerId = req.user?.id
+      const product = await getProductById(sellerId, productId)
+      if(product){
+        const result: number = await deleteProductById(sellerId, productId)
+        if (result !== 0) {
+          return res.status(200).json({message: "item deleted"})
+        }
+      } else {
+        return res.status(404).json({message: "item not found"});
+      }
+    } catch (error) {
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+
 }

@@ -84,4 +84,44 @@
  *                   example: Collection not found
  *       '500':
  *         description: Internal server error
+ * /collections/products/{productId}:
+ *   delete:
+ *     summary: Deletes a product
+ *     description: Deletes  product with provided id
+ *     tags:
+ *       - PRODUCT
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: id of the product to delete
+ *     responses:
+ *       '200':
+ *         description: Product deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product deleted successfully
+ *       '410':
+ *         description: not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No item found
+ *       '401':
+ *         description: Unauthorized
+ *       '404':
+ *         description: Seller not found
+ *       '500':
+ *         description: Internal server error
  */
