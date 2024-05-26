@@ -7,10 +7,12 @@ import productSchema, {
 import collectionSchema from '../validations/collectionValidation'
 import isAuthenticated, {
   checkPermission,
+  excludePermission,
 } from '../middlewares/authenticationMiddleware'
 import productController from '../controllers/productController'
 import { UserRole } from '../database/models/userModel'
-import { paramIdSchema } from '../validations/paramValidation'
+import  paramSchema,{ paramIdSchema } from '../validations/paramValidation'
+
 
 const router = express.Router()
 
@@ -50,4 +52,17 @@ router.delete(
   checkPermission(UserRole.SELLER),
   productController.deleteProduct
 )
+router.get(
+  '/products',
+  isAuthenticated,
+  excludePermission(UserRole.SELLER),
+  productController.listProducts,
+)
+router.get(
+  '/:collectionId/products',
+  isAuthenticated,
+  checkPermission(UserRole.SELLER),
+  productController.listCollectionProducts,
+)
+
 export default router

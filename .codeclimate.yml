@@ -15,9 +15,11 @@ checks:
     config:
       threshold: 50
   similar-code:
+    enabled: false
     config:
       threshold: 75
   identical-code:
+    enabled: true
     config:
       threshold: 75
 

@@ -58,4 +58,16 @@ export const checkPermission =
       return next()
     }
     return res.status(401).json({ code: 401, message: 'Unauthorized' })
+  }
+
+export const excludePermission =
+  (excludeRole: string) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user
+
+    const existingUser = await getUserById(user.id)
+    if (existingUser && existingUser.userRole !== excludeRole) {
+      return next()
     }
+    return res.status(401).json({ code: 401, message: 'Unauthorized' })
+  }
