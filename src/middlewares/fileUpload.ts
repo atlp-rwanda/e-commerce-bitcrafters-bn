@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import multer, { FileFilterCallback } from 'multer';
-import { cloudinaryUpload } from '../utils/cloudinary';
+import cloudinaryUpload from '../utils/cloudinary';
 
 export const storage = multer.memoryStorage();
 

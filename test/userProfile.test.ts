@@ -13,7 +13,7 @@ import { createUserProfile } from '../src/services/userServices'
 import * as os from 'os'
 import * as path from 'path'
 import { v2 as cloudinary } from 'cloudinary'
-import { cloudinaryUpload } from '../src/utils/cloudinary'
+import cloudinaryUpload from '../src/utils/cloudinary'
 
 describe('createUserProfile', () => {
   it('should create a new user profile if user exists and profile does not exist', async () => {
@@ -22,6 +22,7 @@ describe('createUserProfile', () => {
       username: 'testuser',
       email: 'test@example.com',
     } as User)
+
 
     const userProfileStub = sinon.stub(UserProfile, 'findOne').resolves(null)
 
@@ -261,13 +262,14 @@ describe('updateUser', () => {
     jsonStub = sinon.stub()
     res = { status: statusStub, json: jsonStub }
     updateUserByIdStub = sinon.stub().resolves()
-    updateUserProfileByIdStub = sinon.stub().resolves()
+    updateUserProfileByIdStub = sinon.stub(UserProfile, 'update');
     getUserProfileByIdStub = sinon.stub().resolves({
       id: 1,
       username: 'newUsername',
       email: 'newemail@example.com',
     })
   })
+
 
   afterEach(() => {
     sinon.restore()
@@ -297,21 +299,9 @@ describe('updateUser', () => {
     updateUserProfileByIdStub.rejects(new Error(errorMessage))
 
     await UserController.updateUser(req as Request, res as Response)
-
-    expect((res.status as sinon.SinonStub).calledWith(500)).to.be.false
+    expect((res.status as sinon.SinonStub).calledWith(500)).to.be.true
   })
-  it('should handle errors', async () => {
-    req.user = { id: 1 }
-    req.body = { username: 'newUsername', email: 'new@example.com' }
-    const errorMessage = 'Internal server error'
-    const error = new Error(errorMessage)
-    const statusStub = res.status as SinonStub
-    const jsonStub = res.json as SinonStub
-
-    await UserController.updateUser(req as Request, res as Response)
-    expect(statusStub.calledWith(500))
-  })
-})
+});
 
 describe('getUser', () => {
   let req: Partial<Request>
@@ -354,8 +344,9 @@ describe('getUser', () => {
     const statusStub = res.status as sinon.SinonStub
     const jsonStub = res.json as sinon.SinonStub
 
-    await UserController.getUser(req as Request, res as Response)
-
+    getUserProfileByIdStub = sinon.stub(UserProfile, 'findOne');
+    getUserProfileByIdStub.rejects(error)
+    await UserController.getUser(req as Request, res as Response);
     expect(statusStub.calledWith(500))
   })
 })

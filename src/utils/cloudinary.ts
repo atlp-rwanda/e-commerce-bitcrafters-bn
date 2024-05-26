@@ -14,7 +14,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-export const cloudinaryUpload = async (
+const cloudinaryUpload = async (
   buffer: Buffer,
   fileName: string,
 ): Promise<string> => {
@@ -39,3 +39,4 @@ export const cloudinaryUpload = async (
     })
   })
 }
+export default cloudinaryUpload
