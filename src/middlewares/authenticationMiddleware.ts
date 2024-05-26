@@ -31,6 +31,11 @@ const isAuthenticated = async (
       if (!user) {
         return res.status(401).json({ message: 'User not found' })
       }
+
+      if(user.status === 'inactive'){
+        return res.status(401).json({ message: 'User is disabled' });
+      }
+
     req.user = user
     res.locals.decoded = user
     next()

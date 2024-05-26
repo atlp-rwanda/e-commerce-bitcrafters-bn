@@ -14,6 +14,7 @@ import isAuthenticated, {
 import { UserRole } from '../database/models/userModel'
 import paramSchema from '../validations/paramValidation'
 import LoginController from '../controllers/LoginController'
+import adminContoller from '../controllers/adminController'
 
 const router = Router()
 
@@ -66,4 +67,15 @@ router.post(
   validateRequest(newPasswordSchema, 'body'),
   UserController.newPassword,
 )
+router.get(
+  '/',
+  isAuthenticated, checkPermission(UserRole.ADMIN),
+  adminContoller.getAllUsers
+)
+
+router.patch(
+  '/:userId/status',
+  isAuthenticated,checkPermission(UserRole.ADMIN),
+   adminContoller.updateStatus)
+
 export default router

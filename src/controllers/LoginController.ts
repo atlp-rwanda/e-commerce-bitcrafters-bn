@@ -31,6 +31,9 @@ export default class LoginController {
       if (!existingUser) {
         return res.status(404).send({ message: 'User not found' })
       }
+      if (existingUser.status==='inactive'){
+        return res.status(401).json({ message: 'User is disabled' });
+      }
 
       const isPasswordValid = await comparePassword(
         password,
