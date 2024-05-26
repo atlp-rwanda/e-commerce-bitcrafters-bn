@@ -125,3 +125,125 @@
  *       '500':
  *         description: Internal server error
  */
+
+/**
+ * @swagger
+ * /collections/products:
+ *   get:
+ *     summary: Get Products
+ *     description: Get allproduct(if buyer) and products in collection if seller
+ *     tags:
+ *       [PRODUCT]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The page
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The limit of products
+ *     responses:
+ *       '200':
+ *         description: Products retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Products retrieved successfully
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Seller has no collection
+ *       '401':
+ *         description: Unauthorized
+ *       '404':
+ *         description: Collection not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Collection not found
+ *       '500':
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /collections/{collectionId}/products:
+ *   get:
+ *     summary: Get Products
+ *     description: Get allproduct(if buyer) and products in collection if seller
+ *     tags:
+ *       [PRODUCT]
+ *     parameters:
+ *       - in: path
+ *         name: collectionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the collection a used want to see
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The page
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The limit of products
+ *     responses:
+ *       '200':
+ *         description: Products retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Products retrieved successfully
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Seller has no collection
+ *       '401':
+ *         description: Unauthorized
+ *       '404':
+ *         description: Collection not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Collection not found
+ *       '500':
+ *         description: Internal server error
+ */

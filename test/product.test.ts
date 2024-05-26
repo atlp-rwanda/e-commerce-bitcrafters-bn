@@ -1,43 +1,48 @@
-import chai, { expect } from 'chai';
-import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-import cloudinary from 'cloudinary';
-import express, { Request, Response, NextFunction } from 'express';
-import Product from '../src/database/models/productModel';
-import Collection from '../src/database/models/collectionModel';
-import productController from '../src/controllers/productController';
+import chai, { expect } from 'chai'
+import sinon from 'sinon'
+import sinonChai from 'sinon-chai'
+import cloudinary from 'cloudinary'
+import moment from 'moment'
+import express, { Request, Response, NextFunction } from 'express'
+import Product from '../src/database/models/productModel'
+import Collection from '../src/database/models/collectionModel'
+import productController from '../src/controllers/productController'
+import isAuthenticated, {
+  checkPermission,
+  excludePermission,
+} from '../src/middlewares/authenticationMiddleware'
 
-chai.use(sinonChai);
+chai.use(sinonChai)
 
-const addProduct = productController.addProduct;
+const addProduct = productController.addProduct
 
 describe('addProduct', function addProductTest() {
-  this.timeout(60000);
+  this.timeout(60000)
 
-  let req: Request;
-  let res: Response;
-  let next: NextFunction;
-  let findOneStub: sinon.SinonStub;
-  let createStub: sinon.SinonStub;
-  let uploadStub: sinon.SinonStub;
-  let findByPkStub: sinon.SinonStub;
+  let req: Request
+  let res: Response
+  let next: NextFunction
+  let findOneStub: sinon.SinonStub
+  let createStub: sinon.SinonStub
+  let uploadStub: sinon.SinonStub
+  let findByPkStub: sinon.SinonStub
 
   beforeEach(() => {
-    req = express.request as Request;
+    req = express.request as Request
     res = {
       status: sinon.stub().returnsThis(),
       json: sinon.stub(),
-    } as unknown as Response;
-    next = sinon.spy();
-    findOneStub = sinon.stub(Product, 'findOne');
-    createStub = sinon.stub(Product, 'create');
-    uploadStub = sinon.stub(cloudinary.v2.uploader, 'upload');
-    findByPkStub = sinon.stub(Collection, 'findByPk');
-  });
+    } as unknown as Response
+    next = sinon.spy()
+    findOneStub = sinon.stub(Product, 'findOne')
+    createStub = sinon.stub(Product, 'create')
+    uploadStub = sinon.stub(cloudinary.v2.uploader, 'upload')
+    findByPkStub = sinon.stub(Collection, 'findByPk')
+  })
 
   afterEach(() => {
-    sinon.restore();
-  });
+    sinon.restore()
+  })
 
   it('should return 409 if product already exists', async () => {
     req.body = {
@@ -48,20 +53,20 @@ describe('addProduct', function addProductTest() {
       sku: '456sku',
       quantity: 'quantity',
       expiryDate: '25-12-2027',
-    };
-    req.params = { id: 'collectionId' };
-    req.user = { id: 123 };
+    }
+    req.params = { id: 'collectionId' }
+    req.user = { id: 123 }
 
-    findOneStub.resolves({ name: 'Test Product' });
-    findByPkStub.resolves({ id: 'collectionId' });
+    findOneStub.resolves({ name: 'Test Product' })
+    findByPkStub.resolves({ id: 'collectionId' })
 
-    await addProduct(req, res);
+    await addProduct(req, res)
 
-    expect(res.status).to.have.been.calledWith(409);
+    expect(res.status).to.have.been.calledWith(409)
     expect(res.json).to.have.been.calledWith({
       message: 'Product exists, please update your stock',
-    });
-  });
+    })
+  })
 
   it('should return 404 if collection does not exist', async () => {
     req.body = {
@@ -72,19 +77,19 @@ describe('addProduct', function addProductTest() {
       sku: '456sku',
       quantity: 'quantity',
       expiryDate: '25-12-2027',
-    };
-    req.params = { id: 'collectionId' };
-    req.user = { id: 123 };
+    }
+    req.params = { id: 'collectionId' }
+    req.user = { id: 123 }
 
-    findByPkStub.resolves(null);
+    findByPkStub.resolves(null)
 
-    await addProduct(req, res);
+    await addProduct(req, res)
 
-    expect(res.status).to.have.been.calledWith(404);
+    expect(res.status).to.have.been.calledWith(404)
     expect(res.json).to.have.been.calledWith({
       message: 'Collection not found',
-    });
-  });
+    })
+  })
 
   it('should return 400 if no images are provided', async () => {
     req.body = {
@@ -95,20 +100,20 @@ describe('addProduct', function addProductTest() {
       sku: '456sku',
       quantity: 'quantity',
       expiryDate: '25-12-2027',
-    };
-    req.params = { id: 'collectionId' };
-    req.user = { id: 123 };
-    req.files = [];
+    }
+    req.params = { id: 'collectionId' }
+    req.user = { id: 123 }
+    req.files = []
 
-    findByPkStub.resolves({ id: 'collectionId' });
+    findByPkStub.resolves({ id: 'collectionId' })
 
-    await addProduct(req, res);
+    await addProduct(req, res)
 
-    expect(res.status).to.have.been.calledWith(400);
+    expect(res.status).to.have.been.calledWith(400)
     expect(res.json).to.have.been.calledWith({
       message: 'Images are required',
-    });
-  });
+    })
+  })
 
   it('should return 400 if fewer than 4 images are provided', async () => {
     req.body = {
@@ -119,20 +124,24 @@ describe('addProduct', function addProductTest() {
       sku: '456sku',
       quantity: 'quantity',
       expiryDate: '25-12-2027',
-    };
-    req.params = { id: 'collectionId' };
-    req.user = { id: 123 };
-    req.files = [{ path: 'imagePath1' }, { path: 'imagePath2' }, { path: 'imagePath3' }] as Express.Multer.File[];
+    }
+    req.params = { id: 'collectionId' }
+    req.user = { id: 123 }
+    req.files = [
+      { path: 'imagePath1' },
+      { path: 'imagePath2' },
+      { path: 'imagePath3' },
+    ] as Express.Multer.File[]
 
-    findByPkStub.resolves({ id: 'collectionId' });
+    findByPkStub.resolves({ id: 'collectionId' })
 
-    await addProduct(req, res);
+    await addProduct(req, res)
 
-    expect(res.status).to.have.been.calledWith(400);
+    expect(res.status).to.have.been.calledWith(400)
     expect(res.json).to.have.been.calledWith({
       message: 'Please upload 4 to 8 images',
-    });
-  });
+    })
+  })
 
   it('should return 400 if more than 8 images are provided', async () => {
     req.body = {
@@ -143,9 +152,9 @@ describe('addProduct', function addProductTest() {
       sku: '456sku',
       quantity: 'quantity',
       expiryDate: '25-12-2027',
-    };
-    req.params = { id: 'collectionId' };
-    req.user = { id: 123 };
+    }
+    req.params = { id: 'collectionId' }
+    req.user = { id: 123 }
     req.files = [
       { path: 'imagePath1' },
       { path: 'imagePath2' },
@@ -156,17 +165,17 @@ describe('addProduct', function addProductTest() {
       { path: 'imagePath7' },
       { path: 'imagePath8' },
       { path: 'imagePath9' },
-    ] as Express.Multer.File[];
+    ] as Express.Multer.File[]
 
-    findByPkStub.resolves({ id: 'collectionId' });
+    findByPkStub.resolves({ id: 'collectionId' })
 
-    await addProduct(req, res);
+    await addProduct(req, res)
 
-    expect(res.status).to.have.been.calledWith(400);
+    expect(res.status).to.have.been.calledWith(400)
     expect(res.json).to.have.been.calledWith({
       message: 'Please upload 4 to 8 images',
-    });
-  });
+    })
+  })
 
   it('should add product successfully', async () => {
     req.body = {
@@ -177,21 +186,21 @@ describe('addProduct', function addProductTest() {
       sku: '456sku',
       quantity: 'quantity',
       expiryDate: '25-12-2027',
-    };
-    req.params = { id: 'collectionId' };
+    }
+    req.params = { id: 'collectionId' }
     req.files = [
       { path: 'imagePath1' },
       { path: 'imagePath2' },
       { path: 'imagePath3' },
       { path: 'imagePath4' },
-    ] as Express.Multer.File[];
-    req.user = { id: 123 };
+    ] as Express.Multer.File[]
+    req.user = { id: 123 }
 
-    findOneStub.resolves(null);
-    findByPkStub.resolves({ id: 'collectionId' });
-    uploadStub.resolves({ secure_url: 'imageUrl' });
+    findOneStub.resolves(null)
+    findByPkStub.resolves({ id: 'collectionId' })
+    uploadStub.resolves({ secure_url: 'imageUrl' })
 
-    await addProduct(req, res);
+    await addProduct(req, res)
 
     expect(createStub).to.have.been.calledWith({
       name: 'Test Product',
@@ -201,15 +210,15 @@ describe('addProduct', function addProductTest() {
       bonus: '10',
       sku: '456sku',
       quantity: 'quantity',
-      images: [ 'imageUrl', 'imageUrl', 'imageUrl', 'imageUrl' ],
+      images: ['imageUrl', 'imageUrl', 'imageUrl', 'imageUrl'],
       expiryDate: '25-12-2027',
       sellerId: 123,
-    });
-    expect(res.status).to.have.been.calledWith(201);
+    })
+    expect(res.status).to.have.been.calledWith(201)
     expect(res.json).to.have.been.calledWith({
       message: 'Product added successfully',
-    });
-  });
+    })
+  })
 
   it('should handle errors during product creation', async () => {
     req.body = {
@@ -220,26 +229,486 @@ describe('addProduct', function addProductTest() {
       sku: '456sku',
       quantity: 'quantity',
       expiryDate: '25-12-2027',
-    };
-    req.params = { id: 'collectionId' };
+    }
+    req.params = { id: 'collectionId' }
     req.files = [
       { path: 'imagePath1' },
       { path: 'imagePath2' },
       { path: 'imagePath3' },
       { path: 'imagePath4' },
-    ] as Express.Multer.File[];
-    req.user = { id: 123 };
+    ] as Express.Multer.File[]
+    req.user = { id: 123 }
 
-    findOneStub.resolves(null);
-    findByPkStub.resolves({ id: 'collectionId' });
-    uploadStub.resolves({ secure_url: 'imageUrl' });
-    createStub.rejects(new Error('Creation error'));
+    findOneStub.resolves(null)
+    findByPkStub.resolves({ id: 'collectionId' })
+    uploadStub.resolves({ secure_url: 'imageUrl' })
+    createStub.rejects(new Error('Creation error'))
 
-    await addProduct(req, res);
+    await addProduct(req, res)
 
-    expect(res.status).to.have.been.calledWith(500);
+    expect(res.status).to.have.been.calledWith(500)
     expect(res.json).to.have.been.calledWith({
       message: 'Internal server error',
-    });
-  });
-});
+    })
+  })
+})
+
+// ==========================================================================================================================================
+
+describe('List Products', () => {
+  let req: Request
+  let res: Response
+  let next: NextFunction
+  let sandbox: sinon.SinonSandbox
+  let findOneStub: sinon.SinonStub
+  let findAllStub: sinon.SinonStub
+  let findCollectionStub: sinon.SinonStub
+  let momentStub: sinon.SinonStub
+
+  beforeEach(() => {
+    req = {
+      headers: {},
+      query: {},
+    } as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+      locals: {},
+    } as unknown as Response
+    next = sinon.spy()
+    sandbox = sinon.createSandbox()
+    findOneStub = sinon.stub(Product, 'findOne')
+    findAllStub = sinon.stub(Product, 'findAll')
+    findCollectionStub = sinon.stub(Collection, 'findOne')
+    momentStub = sinon.stub(moment, 'defaultFormat')
+  })
+
+  afterEach(() => {
+    sinon.restore()
+    sandbox.restore()
+  })
+  it('should get all products for a buyer using default limit and page', async () => {
+    const page = ''
+    const limit = ''
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.user = { userRole: 'buyer', id: 1 }
+    await isAuthenticated(req, res, next)
+    await excludePermission('seller')(req, res, next)
+    const currentDate = moment().format('YYYY-MM-DD HH:mm:ssZ')
+    const mockProducts = [{} as Product, {} as Product, {} as Product]
+
+    findAllStub.resolves(mockProducts)
+
+    await productController.listProducts(req, res)
+
+    expect(res.status).to.be.calledWith(200)
+    expect(res.json).to.be.calledWith({
+      message: 'Products retrieved successfully',
+      products: mockProducts,
+      pagination: { page: 1, limit: 5, totalPages: 1 },
+    })
+  })
+
+  it('should get all products for admin', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.user = { userRole: 'admin', id: 1 }
+    await isAuthenticated(req, res, next)
+    await excludePermission('seller')(req, res, next)
+    const currentDate = moment().format('YYYY-MM-DD HH:mm:ssZ')
+    const mockProducts = [{} as Product, {} as Product, {} as Product]
+
+    findAllStub.resolves(mockProducts)
+
+    await productController.listProducts(req, res)
+
+    expect(res.status).to.be.calledWith(200)
+    expect(res.json).to.be.calledWith({
+      message: 'Products retrieved successfully',
+      products: mockProducts,
+      pagination: { page, limit, totalPages: 3 },
+    })
+  })
+
+  it('should get all products for a buyer', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.user = { userRole: 'buyer', id: 1 }
+    await isAuthenticated(req, res, next)
+    await excludePermission('seller')(req, res, next)
+    const currentDate = moment().format('YYYY-MM-DD HH:mm:ssZ')
+    const mockProducts = [{} as Product, {} as Product, {} as Product]
+
+    findAllStub.resolves(mockProducts)
+
+    await productController.listProducts(req, res)
+
+    expect(res.status).to.be.calledWith(200)
+    expect(res.json).to.be.calledWith({
+      message: 'Products retrieved successfully',
+      products: mockProducts,
+      pagination: { page, limit, totalPages: 3 },
+    })
+  })
+
+  it('----should return 500 if collection brings error', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.user = { userRole: 'buyer', id: 1 }
+    await isAuthenticated(req, res, next)
+    await excludePermission('seller')(req, res, next)
+    findCollectionStub.returns(new Error('This error'))
+    findAllStub.returns([])
+
+    await productController.listProducts(req, res)
+
+    expect(res.status).to.be.calledWith(500)
+    expect(res.json).to.be.called
+  })
+
+  it('new should return 500 if error occurs', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.user = { userRole: 'buyer', id: 1 }
+    const thisError = new Error('Error occured')
+
+    findCollectionStub.resolves({})
+    findAllStub.resolves(thisError)
+    await isAuthenticated(req, res, next)
+    await excludePermission('seller')(req, res, next)
+    await productController.listProducts(req, res)
+
+    expect(res.status).to.be.calledWith(500)
+    expect(res.json).to.be.called
+  })
+
+  it('should return 500 if error', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.user = { userRole: 'buyer', id: 1 }
+    const thisError = new Error('Error occured')
+
+    findAllStub.rejects(new Error('Unexpected error fetching products'))
+
+    await productController.listProducts(req, res)
+
+    expect(res.status).to.be.called
+    expect(res.json).to.be.calledWith({
+      message: 'Internal server error',
+      error: 'Unexpected error fetching products',
+    })
+  })
+
+  it('should return 400 for invalid page or limit parameter (buyer)', async () => {
+    const page = -10
+    const limit = -21
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.user = { userRole: 'buyer', id: 1 }
+    await isAuthenticated(req, res, next)
+    await excludePermission('seller')(req, res, next)
+    await productController.listProducts(req, res)
+
+    expect(res.status).to.be.calledWith(400)
+    expect(res.json).to.be.calledWith({
+      message: 'Invalid pagination parameters',
+    })
+  })
+})
+
+describe('List products from a collection', () => {
+  let req: Request
+  let res: Response
+  let next: NextFunction
+  let sandbox: sinon.SinonSandbox
+  let findOneStub: sinon.SinonStub
+  let findAllStub: sinon.SinonStub
+  let findCollectionStub: sinon.SinonStub
+  let momentStub: sinon.SinonStub
+
+  beforeEach(() => {
+    req = {
+      headers: {},
+      query: {},
+    } as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+      locals: {},
+    } as unknown as Response
+    next = sinon.spy()
+    sandbox = sinon.createSandbox()
+    findOneStub = sinon.stub(Product, 'findOne')
+    findAllStub = sinon.stub(Product, 'findAll')
+    findCollectionStub = sinon.stub(Collection, 'findOne')
+    momentStub = sinon.stub(moment, 'defaultFormat')
+  })
+
+  afterEach(() => {
+    sinon.restore()
+    sandbox.restore()
+  })
+
+  it('should get products from a sellers collection using default limit and page', async () => {
+    const page = ''
+    const limit = ''
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.params = { collectionId: 'f3692b5b-446f-4adc-ac5f-c6a640947d84' }
+    req.user = { userRole: 'seller', id: 1 }
+    await isAuthenticated(req, res, next)
+    await checkPermission('seller')(req, res, next)
+
+    const currentDate = moment().format('YYYY-MM-DD HH:mm:ssZ')
+    const mockProducts = [
+      {} as Product,
+      {} as Product,
+      {} as Product,
+      {} as Product,
+      {} as Product,
+    ]
+
+    findCollectionStub.resolves({})
+    findAllStub.resolves(mockProducts)
+
+    await productController.listCollectionProducts(req, res)
+
+    expect(res.status).to.be.called
+    expect(res.json).to.be.calledWith({
+      message: 'Products in collection retrieved successfully',
+      products: mockProducts,
+      pagination: { page: 1, limit: 5, totalPages: 1 },
+    })
+  })
+  it('should get products from a sellers collection', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.params = { collectionId: 'f3692b5b-446f-4adc-ac5f-c6a640947d84' }
+    req.user = { userRole: 'seller', id: 1 }
+    await isAuthenticated(req, res, next)
+    await checkPermission('seller')(req, res, next)
+
+    const currentDate = moment().format('YYYY-MM-DD HH:mm:ssZ')
+    const mockProducts = [{} as Product, {} as Product, {} as Product]
+
+    findCollectionStub.resolves({})
+    findAllStub.resolves(mockProducts)
+
+    await productController.listCollectionProducts(req, res)
+
+    expect(res.status).to.be.calledWith(200)
+    expect(res.json).to.be.calledWith({
+      message: 'Products in collection retrieved successfully',
+      products: mockProducts,
+      pagination: { page, limit, totalPages: 3 },
+    })
+  })
+
+  it('should return 400 if seller has no collection', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.params = { collectionId: 'f3692b5b-446f-4adc-ac5f-c6a640947d84' }
+    req.user = { userRole: 'seller', id: 1 }
+    await isAuthenticated(req, res, next)
+    await checkPermission('seller')(req, res, next)
+
+    findCollectionStub.resolves(null)
+
+    await productController.listCollectionProducts(req, res)
+
+    expect(res.status).to.be.calledWith(400)
+    expect(res.json).to.be.calledWith({
+      message: 'Invalid collection id',
+    })
+  })
+
+  it('----should return 500 if collection brings error', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.params = { collectionId: 'f3692b5b-446f-4adc-ac5f-c6a640947d84' }
+    req.user = { userRole: 'seller', id: 1 }
+    await isAuthenticated(req, res, next)
+    await checkPermission('seller')(req, res, next)
+
+    findCollectionStub.returns(new Error('This error'))
+    findAllStub.returns([])
+
+    await productController.listCollectionProducts(req, res)
+
+    expect(res.status).to.be.calledWith(500)
+    expect(res.json).to.be.called
+  })
+
+  it('new should return 500 if error occurs', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.params = { collectionId: 'f3692b5b-446f-4adc-ac5f-c6a640947d84' }
+    req.user = { userRole: 'seller', id: 1 }
+    const thisError = new Error('Error occured')
+
+    findCollectionStub.resolves({})
+    findAllStub.resolves(thisError)
+
+    await isAuthenticated(req, res, next)
+    await checkPermission('seller')(req, res, next)
+    await productController.listCollectionProducts(req, res)
+
+    expect(res.status).to.have.been.called
+    expect(res.json).to.have.been.called
+  })
+
+  it('should return errom and error message', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.params = { collectionId: 'f3692b5b-446f-4adc-ac5f-c6a640947d84' }
+    req.user = { userRole: 'seller', id: 1 }
+    const thisError = new Error('Error occured')
+
+    findCollectionStub.throws(new Error('Error finding collection'))
+
+    await productController.listCollectionProducts(req, res)
+
+    expect(res.status).to.be.calledWith(500)
+    expect(res.json).to.be.calledWith({
+      message: 'Internal server error',
+      error: 'Error finding collection',
+    })
+  })
+
+  it('should return 400 for invalid page or limit parameter (buyer)', async () => {
+    const page = -10
+    const limit = -21
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.params = { collectionId: 'f3692b5b-446f-4adc-ac5f-c6a640947d84' }
+    req.user = { userRole: 'seller', id: 1 }
+
+    await isAuthenticated(req, res, next)
+    await checkPermission('seller')(req, res, next)
+    await productController.listCollectionProducts(req, res)
+
+    expect(res.status).to.be.calledWith(400)
+    expect(res.json).to.be.calledWith({
+      message: 'Invalid pagination parameters',
+    })
+  })
+})

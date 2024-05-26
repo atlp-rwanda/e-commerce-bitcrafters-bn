@@ -1,5 +1,7 @@
 import { Request, Response } from 'express'
 import cloudinary from 'cloudinary'
+import { Op } from 'sequelize'
+import moment from 'moment'
 import {
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY,
@@ -7,14 +9,18 @@ import {
 } from '../config/index'
 import Product from '../database/models/productModel'
 import Collection from '../database/models/collectionModel'
-import { deleteProductById, getProductById } from '../services/productServices'
+import {
+  deleteProductById, getProductById,
+  getProductCount,
+  getProductCollectionCount,
+} from '../services/productServices'
 import { UserRole } from '../database/models/userModel'
 
 cloudinary.v2.config({
   cloud_name: CLOUDINARY_CLOUD_NAME,
   api_key: CLOUDINARY_API_KEY,
   api_secret: CLOUDINARY_API_SECRET,
-})
+}) 
 
 /**
  * Product Controller class
@@ -254,4 +260,126 @@ export default class productController {
       return res.status(500).json({ message: 'Internal server error' })
     }
   }
+
+
+  /**
+   * List products
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
+  static async listProducts(req: Request, res: Response): Promise<Response> {
+    try {
+      const user = req.user
+      const page: number =
+        Number.parseInt(req.query.page as unknown as string, 10) || 1
+      const limit: number =
+        Number.parseInt(req.query.limit as unknown as string, 10) || 5
+
+      if (
+        Number.isNaN(page) ||
+        Number.isNaN(limit) ||
+        page <= 0 ||
+        limit <= 0
+      ) {
+        return res
+          .status(400)
+          .json({ message: 'Invalid pagination parameters' })
+      }
+
+      const offset = (page - 1) * limit
+      const currentDate = moment().format('YYYY-MM-DD HH:mm:ssZ')
+      const totalCount: number = await getProductCount()
+      const totalPages = Math.ceil(totalCount / limit)
+
+      const products =
+        user.userRole === 'buyer'
+          ? await Product.findAll({
+              where: {
+                productStatus: 'available',
+                expiryDate: {
+                  [Op.gt]: currentDate,
+                },
+              },
+              offset,
+              limit,
+            })
+          : await Product.findAll({
+              where: {},
+              offset,
+              limit,
+            })
+
+      return res.status(200).json({
+        message: 'Products retrieved successfully',
+        products,
+        pagination: { limit, page, totalPages },
+      })
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: 'Internal server error', error: error.message })
+    }
+  }
+  
+/**
+   * List products
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
+static async listCollectionProducts(
+  req: Request,
+  res: Response,
+): Promise<Response> {
+  try {
+    const user = req.user
+    const { collectionId } = req.params
+
+    const page: number =
+      Number.parseInt(req.query.page as unknown as string, 10) || 1
+    const limit: number =
+      Number.parseInt(req.query.limit as unknown as string, 10) || 5
+
+    if (
+      Number.isNaN(page) ||
+      Number.isNaN(limit) ||
+      page <= 0 ||
+      limit <= 0
+    ) {
+      return res
+        .status(400)
+        .json({ message: 'Invalid pagination parameters' })
+    }
+
+    const offset = (page - 1) * limit
+
+    const collection = await Collection.findOne({
+      where: { sellerId: user.id, id: collectionId },
+    })
+
+    if (!collection) {
+      return res.status(400).json({ message: 'Invalid collection id' })
+    }
+
+    const totalCount: number = await getProductCollectionCount(collection.id)
+    const totalPages = Math.ceil(totalCount / limit)
+
+    const products = await Product.findAll({
+      where: { collectionId: collection.id, sellerId: user.id },
+      offset,
+      limit,
+    })
+
+    return res.status(200).json({
+      message: 'Products in collection retrieved successfully',
+      products,
+      pagination: { limit, page, totalPages },
+    })
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: 'Internal server error', error: error.message })
+  }
+}
 }
