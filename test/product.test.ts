@@ -712,3 +712,208 @@ describe('List products from a collection', () => {
     })
   })
 })
+
+
+describe('List Collections', () => {
+  let req: Request
+  let res: Response
+  let next: NextFunction
+  let sandbox: sinon.SinonSandbox
+  let findCollectionStub: sinon.SinonStub
+
+  beforeEach(() => {
+    req = {
+      headers: {},
+      query: {},
+    } as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+      locals: {},
+    } as unknown as Response
+    next = sinon.spy()
+    sandbox = sinon.createSandbox()
+    findCollectionStub = sinon.stub(Collection, 'findAll')
+
+  })
+
+  afterEach(() => {
+    sinon.restore()
+    sandbox.restore()
+  })
+
+  it('should get collections of a seller using default limit and page', async () => {
+    const page = ''
+    const limit = ''
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.params = { collectionId: 'f3692b5b-446f-4adc-ac5f-c6a640947d84' }
+    req.user = { userRole: 'seller', id: 1 }
+    // await isAuthenticated(req, res, next)
+    // await checkPermission('seller')(req, res, next)
+
+    const mockCollections = [
+      {} as Collection,
+      {} as Collection,
+      {} as Collection,
+    ]
+
+    findCollectionStub.resolves(mockCollections)
+
+    await productController.listAllCollections(req, res)
+
+    expect(res.status).to.be.called
+    expect(res.json).to.be.calledWith({
+      message: 'Collections retrieved successfully',
+      collections: mockCollections,
+      pagination: { page: 1, limit: 5, totalPages: 1 },
+    })
+  })
+  it('should get products from a sellers collection', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    const mockCollections = [
+      {} as Collection,
+      {} as Collection,
+      {} as Collection,
+    ]
+
+    req.params = { collectionId: 'f3692b5b-446f-4adc-ac5f-c6a640947d84' }
+    req.user = { userRole: 'seller', id: 1 }
+
+    // await isAuthenticated(req, res, next)
+    // await checkPermission('seller')(req, res, next)
+
+    findCollectionStub.resolves(mockCollections)
+
+    await productController.listAllCollections(req, res)
+
+    expect(res.status).to.be.called
+    expect(res.json).to.be.calledWith({
+      message: 'Collections retrieved successfully',
+      collections: mockCollections,
+      pagination: { page: 1, limit: 1, totalPages: 3 },
+    })
+  })
+
+  it('should return 400 if seller has no collection', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.params = { collectionId: 'f3692b5b-446f-4adc-ac5f-c6a640947d84' }
+    req.user = { userRole: 'seller', id: 1 }
+    await isAuthenticated(req, res, next)
+    await checkPermission('seller')(req, res, next)
+
+    findCollectionStub.resolves(null)
+
+    await productController.listAllCollections(req, res)
+
+    expect(res.status).to.be.calledWith(400)
+    expect(res.json).to.be.calledWith({
+      message: 'No collections available',
+    })
+  })
+
+  it('should return 500 if collection brings error', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.params = { collectionId: 'f3692b5b-446f-4adc-ac5f-c6a640947d84' }
+    req.user = { userRole: 'seller', id: 1 }
+    await isAuthenticated(req, res, next)
+    await checkPermission('seller')(req, res, next)
+
+    findCollectionStub.returns(new Error('This error'))
+
+    await productController.listAllCollections(req, res)
+
+    expect(res.status).to.be.calledWith(500)
+    expect(res.json).to.be.called
+  })
+
+
+  it('should return error and error message', async () => {
+    const page = 1
+    const limit = 1
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.params = { collectionId: 'f3692b5b-446f-4adc-ac5f-c6a640947d84' }
+    req.user = { userRole: 'seller', id: 1 }
+    const thisError = new Error('Error occured')
+
+    findCollectionStub.throws(new Error('Error finding collection'))
+
+    await productController.listAllCollections(req, res)
+
+    expect(res.status).to.be.calledWith(500)
+    expect(res.json).to.be.calledWith({
+      message: 'Internal server error',
+      error: 'Error finding collection',
+    })
+  })
+
+  it('should return 400 for invalid page or limit parameter', async () => {
+    const page = -10
+    const limit = -21
+    req = {
+      headers: { authorization: 'Bearer valid_token' },
+      query: { page, limit },
+    } as unknown as Request
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+    } as unknown as Response
+
+    req.params = { collectionId: 'f3692b5b-446f-4adc-ac5f-c6a640947d84' }
+    req.user = { userRole: 'seller', id: 1 }
+
+    await isAuthenticated(req, res, next)
+    await checkPermission('seller')(req, res, next)
+    await productController.listAllCollections(req, res)
+
+    expect(res.status).to.be.calledWith(400)
+    expect(res.json).to.be.calledWith({
+      message: 'Invalid pagination parameters',
+    })
+  })
+})

@@ -25,12 +25,20 @@ router.post(
   productController.addProduct,
 )
 router.post(
-  '/collection',
+  '/',
   isAuthenticated,
   checkPermission(UserRole.SELLER),
   validateRequest(collectionSchema, 'body'),
   productController.createCollection,
 )
+
+router.get(
+  '/',
+  isAuthenticated,
+  checkPermission(UserRole.SELLER),
+  productController.listAllCollections,
+)
+
 router.patch(
   '/product/:productId/status',
   isAuthenticated,
