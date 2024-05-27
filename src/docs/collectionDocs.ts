@@ -1,6 +1,6 @@
 /**
  * @swagger
- * /collections/collection:
+ * /collections:
  *   post:
  *     summary: Create a new collection
  *     description: Create a new collection with the provided name

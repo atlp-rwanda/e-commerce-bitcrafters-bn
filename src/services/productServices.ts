@@ -43,3 +43,9 @@ export const getProductCollectionCount = async (collectionId: string) => {
   })
   return products.length
 }
+export const getCollectionCount = async (sellerId:number) => {
+  const collections = await Collection.findAll({
+    where: { sellerId }
+  })
+  return collections.length
+}

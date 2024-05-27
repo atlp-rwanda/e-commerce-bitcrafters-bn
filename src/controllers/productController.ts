@@ -13,6 +13,7 @@ import {
   deleteProductById, getProductById,
   getProductCount,
   getProductCollectionCount,
+  getCollectionCount,
 } from '../services/productServices'
 import { UserRole } from '../database/models/userModel'
 
@@ -119,6 +120,63 @@ export default class productController {
       return res.status(500).json({ message: 'Internal server error' })
     }
   }
+
+  /**
+   * List products
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
+static async listAllCollections(
+  req: Request,
+  res: Response,
+): Promise<Response> {
+  try {
+    const user = req.user
+
+    const page: number =
+      Number.parseInt(req.query.page as unknown as string, 10) || 1
+    const limit: number =
+      Number.parseInt(req.query.limit as unknown as string, 10) || 5
+
+    if (
+      Number.isNaN(page) ||
+      Number.isNaN(limit) ||
+      page <= 0 ||
+      limit <= 0
+    ) {
+      return res
+        .status(400)
+        .json({ message: 'Invalid pagination parameters' })
+    }
+
+    const offset = (page - 1) * limit
+
+    const collections = await Collection.findAll({
+      where: { sellerId: user.id},
+      offset,
+      limit,
+    })
+
+    if (!collections) {
+      return res.status(400).json({ message: 'No collections available' })
+    }
+
+    const totalCount: number = await getCollectionCount(user.id)
+    const totalPages = Math.ceil(totalCount / limit)
+
+
+    return res.status(200).json({
+      message: 'Collections retrieved successfully',
+      collections,
+      pagination: { limit, page, totalPages },
+    })
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: 'Internal server error', error: error.message })
+  }
+}
 
   //  User should be able to view specific item
 
