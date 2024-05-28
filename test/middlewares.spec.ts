@@ -1,5 +1,5 @@
 import chai, { expect } from 'chai'
-import sinon from 'sinon'
+import sinon, { SinonSpy } from 'sinon'
 import sinonChai from 'sinon-chai'
 import jwt from 'jsonwebtoken'
 import { Request, Response, NextFunction } from 'express'
@@ -12,6 +12,8 @@ import { Socket } from 'socket.io'
 import { ExtendedError } from 'socket.io/dist/namespace'
 import socketAuthMiddleware from '../src/middlewares/socketMiddleware'
 import { UserAttributes } from '../src/database/models/userModel'
+import checkCartMiddleware from '../src/middlewares/checkCartMiddleware'
+import Cart from '../src/database/models/cartModel'
 
 chai.use(sinonChai)
 
@@ -388,5 +390,75 @@ describe('socketAuthMiddleware', () => {
     expect(next.calledOnce).to.be.true
     expect(next.firstCall.args[0]).to.be.undefined
     expect(socket.data.user).to.deep.equal(decoded)
+  })
+})
+
+// ======checkCartMiddleware=======================================
+describe('checkCartMiddleware', () => {
+  let req: Partial<Request>
+  let res: Partial<Response>
+  let next: SinonSpy
+
+  beforeEach(() => {
+    req = {
+      user: {
+        id: 1,
+      },
+    }
+
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub().returnsThis(),
+    } as unknown as Response
+
+    next = sinon.spy() as SinonSpy
+  })
+
+  afterEach(() => {
+    sinon.restore()
+  })
+
+  it('should call next if an active cart is found', async () => {
+    const cart = {
+      id: 1,
+      buyerId: req.user.id,
+      status: 'active',
+      items: [
+        {
+          productId: 'a56eb4af-8194-413a-a487-d9884300c033',
+          name: 'Laptop Bags',
+          quantity: 2,
+          price: 18000,
+        },
+      ],
+    } as any
+
+    const findOneStub = sinon.stub(Cart, 'findOne').resolves(cart)
+
+    await checkCartMiddleware(req as Request, res as Response, next)
+
+    expect(findOneStub.calledOnce).to.be.true
+    expect(next.calledOnce).to.be.true
+    expect(next.calledWith()).to.be.true
+  })
+
+  it('should return 404 if no active cart is found', async () => {
+    const findOneStub = sinon.stub(Cart, 'findOne').resolves(null)
+
+    await checkCartMiddleware(req as Request, res as Response, next)
+
+    expect(findOneStub.calledOnce).to.be.true
+    expect(next.notCalled).to.be.true
+  })
+
+  it('should call next with an error if an exception occurs', async () => {
+    const error = new Error('Database error')
+    const findOneStub = sinon.stub(Cart, 'findOne').rejects(error)
+
+    await checkCartMiddleware(req as Request, res as Response, next)
+
+    expect(findOneStub.calledOnce).to.be.true
+    expect(next.calledOnce).to.be.true
+    expect(next.calledWith(error)).to.be.true
   })
 })
