@@ -7,10 +7,13 @@ import {
   CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET,
 } from '../config/index'
+import eventEmitter from '../services/notificationServices'
+
 import Product from '../database/models/productModel'
 import Collection from '../database/models/collectionModel'
 import {
-  deleteProductById, getProductById,
+  deleteProductById,
+  getProductById,
   getProductCount,
   getProductCollectionCount,
   getCollectionCount,
@@ -21,7 +24,7 @@ cloudinary.v2.config({
   cloud_name: CLOUDINARY_CLOUD_NAME,
   api_key: CLOUDINARY_API_KEY,
   api_secret: CLOUDINARY_API_SECRET,
-}) 
+})
 
 /**
  * Product Controller class
@@ -74,7 +77,7 @@ export default class productController {
 
       const imageUrls = uploadedImages.map((image) => image.secure_url)
 
-      await Product.create({
+      const product = await Product.create({
         name,
         price,
         category,
@@ -86,6 +89,7 @@ export default class productController {
         expiryDate,
         sellerId,
       })
+      eventEmitter.emit('product:created', product)
 
       return res.status(201).json({ message: 'Product added successfully' })
     } catch (error) {
@@ -112,7 +116,7 @@ export default class productController {
         description,
         sellerId,
       })
-
+      eventEmitter.emit('collection:created', collection)
       return res
         .status(201)
         .json({ message: 'Collection created successfully', collection })
@@ -215,8 +219,8 @@ static async listAllCollections(
           return res.status(403).json({
             status: 403,
             message: 'You are not authorized to access this product',
-         })
-      }
+          })
+        }
         if (product.quantity > 0) {
           return res.status(200).json({
             status: 200,
@@ -319,7 +323,6 @@ static async listAllCollections(
     }
   }
 
-
   /**
    * List products
    * @param {Request} req - Express request object
@@ -379,65 +382,65 @@ static async listAllCollections(
         .json({ message: 'Internal server error', error: error.message })
     }
   }
-  
-/**
+
+  /**
    * List products
    * @param {Request} req - Express request object
    * @param {Response} res - Express response object
    * @returns {Promise<Response>} Promise that resolves to an Express response
    */
-static async listCollectionProducts(
-  req: Request,
-  res: Response,
-): Promise<Response> {
-  try {
-    const user = req.user
-    const { collectionId } = req.params
+  static async listCollectionProducts(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
+    try {
+      const user = req.user
+      const { collectionId } = req.params
 
-    const page: number =
-      Number.parseInt(req.query.page as unknown as string, 10) || 1
-    const limit: number =
-      Number.parseInt(req.query.limit as unknown as string, 10) || 5
+      const page: number =
+        Number.parseInt(req.query.page as unknown as string, 10) || 1
+      const limit: number =
+        Number.parseInt(req.query.limit as unknown as string, 10) || 5
 
-    if (
-      Number.isNaN(page) ||
-      Number.isNaN(limit) ||
-      page <= 0 ||
-      limit <= 0
-    ) {
+      if (
+        Number.isNaN(page) ||
+        Number.isNaN(limit) ||
+        page <= 0 ||
+        limit <= 0
+      ) {
+        return res
+          .status(400)
+          .json({ message: 'Invalid pagination parameters' })
+      }
+
+      const offset = (page - 1) * limit
+
+      const collection = await Collection.findOne({
+        where: { sellerId: user.id, id: collectionId },
+      })
+
+      if (!collection) {
+        return res.status(400).json({ message: 'Invalid collection id' })
+      }
+
+      const totalCount: number = await getProductCollectionCount(collection.id)
+      const totalPages = Math.ceil(totalCount / limit)
+
+      const products = await Product.findAll({
+        where: { collectionId: collection.id, sellerId: user.id },
+        offset,
+        limit,
+      })
+
+      return res.status(200).json({
+        message: 'Products in collection retrieved successfully',
+        products,
+        pagination: { limit, page, totalPages },
+      })
+    } catch (error) {
       return res
-        .status(400)
-        .json({ message: 'Invalid pagination parameters' })
+        .status(500)
+        .json({ message: 'Internal server error', error: error.message })
     }
-
-    const offset = (page - 1) * limit
-
-    const collection = await Collection.findOne({
-      where: { sellerId: user.id, id: collectionId },
-    })
-
-    if (!collection) {
-      return res.status(400).json({ message: 'Invalid collection id' })
-    }
-
-    const totalCount: number = await getProductCollectionCount(collection.id)
-    const totalPages = Math.ceil(totalCount / limit)
-
-    const products = await Product.findAll({
-      where: { collectionId: collection.id, sellerId: user.id },
-      offset,
-      limit,
-    })
-
-    return res.status(200).json({
-      message: 'Products in collection retrieved successfully',
-      products,
-      pagination: { limit, page, totalPages },
-    })
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: 'Internal server error', error: error.message })
   }
-}
 }

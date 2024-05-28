@@ -8,6 +8,10 @@ import { JWT_SECRET, JWT_EXPIRE_TIME } from '../src/config'
 import * as userServiceHelpers from '../src/services/userServices'
 import * as tokenHelpers from '../src/utils/jwt'
 import User from '../src/database/models/userModel'
+import { Socket } from 'socket.io'
+import { ExtendedError } from 'socket.io/dist/namespace'
+import socketAuthMiddleware from '../src/middlewares/socketMiddleware'
+import { UserAttributes } from '../src/database/models/userModel'
 
 chai.use(sinonChai)
 
@@ -141,7 +145,8 @@ describe('isAuthenticated function', () => {
     expect(jwtVerifyStub).to.have.been.calledWith('validToken', JWT_SECRET)
     expect(res.status).to.have.been.calledWith(500)
     expect(res.json).to.have.been.calledWith({
-      message: 'Internal server down', error: 'Invalid token'
+      message: 'Internal server down',
+      error: 'Invalid token',
     })
     expect(next).not.to.have.been.called
   })
@@ -291,5 +296,97 @@ describe('isAuthenticated function', () => {
 
   afterEach(() => {
     sandbox.restore()
+  })
+})
+
+// =======socket socketAuthMiddleware=======================================
+describe('socketAuthMiddleware', () => {
+  let socket: Partial<Socket>
+  let next: sinon.SinonSpy
+  let jwtVerifyStub: sinon.SinonStub
+
+  beforeEach(() => {
+    socket = {
+      handshake: {
+        auth: {
+          token: 'valid.token.here',
+        },
+        headers: undefined,
+        time: '',
+        address: '',
+        xdomain: false,
+        secure: false,
+        issued: 0,
+        url: '',
+        query: undefined,
+      },
+      data: {},
+    }
+    next = sinon.spy()
+    jwtVerifyStub = sinon.stub(jwt, 'verify')
+  })
+
+  afterEach(() => {
+    jwtVerifyStub.restore()
+  })
+
+  it('should call next with an error if no token is provided', () => {
+    socket.handshake.auth.token = ''
+
+    socketAuthMiddleware(socket as Socket, next)
+
+    expect(next.calledOnce).to.be.true
+    const error = next.firstCall.args[0] as ExtendedError
+    expect(error).to.be.instanceOf(Error)
+    expect(error.message).to.equal('Authentication error')
+    expect(error.data).to.deep.equal({ message: 'No token provided' })
+  })
+
+  it('should call next with an error if token verification fails', () => {
+    jwtVerifyStub.callsFake((token, secret, callback) => {
+      callback(new Error('Token verification failed'), null)
+    })
+
+    socketAuthMiddleware(socket as Socket, next)
+
+    expect(next.calledOnce).to.be.true
+    const error = next.firstCall.args[0] as ExtendedError
+    expect(error).to.be.instanceOf(Error)
+    expect(error.message).to.equal('Authentication error')
+    expect(error.data).to.deep.equal({
+      message: 'Failed to authenticate token',
+    })
+  })
+
+  it('should call next with an error if decoded token is not an object', () => {
+    jwtVerifyStub.callsFake((token, secret, callback) => {
+      callback(null, 'invalid-decoded-token')
+    })
+
+    socketAuthMiddleware(socket as Socket, next)
+
+    expect(next.calledOnce).to.be.true
+    const error = next.firstCall.args[0] as ExtendedError
+    expect(error).to.be.instanceOf(Error)
+    expect(error.message).to.equal('Authentication error')
+    expect(error.data).to.deep.equal({
+      message: 'Failed to authenticate token',
+    })
+  })
+
+  it('should call next without error and attach decoded token to socket data', () => {
+    const decoded: Partial<UserAttributes> = {
+      id: 1,
+      email: 'user@example.com',
+    }
+    jwtVerifyStub.callsFake((token, secret, callback) => {
+      callback(null, decoded)
+    })
+
+    socketAuthMiddleware(socket as Socket, next)
+
+    expect(next.calledOnce).to.be.true
+    expect(next.firstCall.args[0]).to.be.undefined
+    expect(socket.data.user).to.deep.equal(decoded)
   })
 })

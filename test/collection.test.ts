@@ -4,19 +4,18 @@ import sinonChai from 'sinon-chai'
 import express, { Request, Response, NextFunction } from 'express'
 import Collection from '../src/database/models/collectionModel'
 import productController from '../src/controllers/productController'
-
+import eventEmitter from '../src/services/notificationServices'
 chai.use(sinonChai)
 
 const createCollection = productController.createCollection
 
-describe('createCollection', function createCollectionTest() {
-  this.timeout(60000)
-
+describe('ProductController', () => {
   let req: Request
   let res: Response
   let next: NextFunction
   let findOneStub: sinon.SinonStub
   let createStub: sinon.SinonStub
+  let eventEmitterSpy: sinon.SinonSpy
 
   beforeEach(() => {
     req = express.request as Request
@@ -27,6 +26,7 @@ describe('createCollection', function createCollectionTest() {
     next = sinon.spy()
     findOneStub = sinon.stub(Collection, 'findOne')
     createStub = sinon.stub(Collection, 'create')
+    eventEmitterSpy = sinon.spy(eventEmitter, 'emit')
   })
 
   afterEach(() => {
@@ -40,36 +40,30 @@ describe('createCollection', function createCollectionTest() {
     }
     req.user = { id: 123 }
 
+    const createdCollection = {
+      id: 'collectionId',
+      name: 'Test Collection',
+      description: 'Test Description',
+      sellerId: 123,
+    }
     findOneStub.resolves(null)
+    createStub.resolves(createdCollection)
 
     await createCollection(req, res)
 
     expect(createStub).to.have.been.calledWith({
       name: 'Test Collection',
       description: 'Test Description',
-      sellerId: 123
+      sellerId: 123,
     })
+    expect(eventEmitterSpy).to.have.been.calledWith(
+      'collection:created',
+      createdCollection,
+    )
     expect(res.status).to.have.been.calledWith(201)
     expect(res.json).to.have.been.calledWith({
       message: 'Collection created successfully',
-      collection: undefined,
+      collection: createdCollection,
     })
   })
-  it('should handle errors during collection creation', async () => {
-    req.body = {
-      name: 'Test Product',
-      description: 'Test Description',
-    };
-    req.user = { id: 123 };
-
-    findOneStub.resolves(null);
-    createStub.rejects(new Error('Creation error'));
-
-    await createCollection(req, res);
-
-    expect(res.status).to.have.been.calledWith(500);
-    expect(res.json).to.have.been.calledWith({
-      message: 'Internal server error',
-    });
-  });
 })

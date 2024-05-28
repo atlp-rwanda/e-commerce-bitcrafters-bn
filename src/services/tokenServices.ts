@@ -49,7 +49,6 @@ export const validateRedisToken = (token: string) => {
     ) as JwtPayload
     return decoded
   } catch (error) {
-    console.error('Token validation error:', error)
     return null
   }
 }
