@@ -14,34 +14,98 @@ import isAuthenticated, {
 
 chai.use(sinonChai)
 
+import { eventEmitter } from '../src/services/notificationServices'
+chai.use(sinonChai)
+
 const addProduct = productController.addProduct
 
 describe('addProduct', function addProductTest() {
   this.timeout(60000)
 
-  let req: Request
-  let res: Response
-  let next: NextFunction
+  let req: Partial<Request>
+  let res: Partial<Response>
   let findOneStub: sinon.SinonStub
+  let findByPkStub: sinon.SinonStub
   let createStub: sinon.SinonStub
   let uploadStub: sinon.SinonStub
-  let findByPkStub: sinon.SinonStub
+  let eventEmitterSpy: sinon.SinonSpy
 
   beforeEach(() => {
-    req = express.request as Request
+    req = {
+      body: {},
+      params: {},
+      files: [],
+      user: {},
+    }
     res = {
       status: sinon.stub().returnsThis(),
-      json: sinon.stub(),
-    } as unknown as Response
-    next = sinon.spy()
+      json: sinon.stub().returnsThis(),
+    }
     findOneStub = sinon.stub(Product, 'findOne')
+    findByPkStub = sinon.stub(Collection, 'findByPk')
     createStub = sinon.stub(Product, 'create')
     uploadStub = sinon.stub(cloudinary.v2.uploader, 'upload')
-    findByPkStub = sinon.stub(Collection, 'findByPk')
+    eventEmitterSpy = sinon.spy(eventEmitter, 'emit')
   })
 
   afterEach(() => {
     sinon.restore()
+  })
+
+  it('should add product successfully', async () => {
+    req.body = {
+      name: 'Test Product',
+      price: 10,
+      category: 'category',
+      bonus: '10',
+      sku: '456sku',
+      quantity: 'quantity',
+      expiryDate: '25-12-2027',
+    }
+    req.params = { id: 'collectionId' }
+    req.files = [
+      { path: 'imagePath1' },
+      { path: 'imagePath2' },
+      { path: 'imagePath3' },
+      { path: 'imagePath4' },
+    ] as Express.Multer.File[]
+    req.user = { id: 123 }
+
+    findOneStub.resolves(null)
+    findByPkStub.resolves({ id: 'collectionId' })
+    uploadStub.resolves({ secure_url: 'imageUrl' })
+    createStub.resolves({
+      id: 1,
+      name: 'Test Product',
+      price: 10,
+      category: 'category',
+      bonus: '10',
+      sku: '456sku',
+      quantity: 'quantity',
+      expiryDate: '25-12-2027',
+      images: ['imageUrl', 'imageUrl', 'imageUrl', 'imageUrl'],
+      sellerId: 123,
+    })
+
+    await addProduct(req as Request, res as Response)
+
+    expect(createStub).to.have.been.calledWith({
+      name: 'Test Product',
+      price: 10,
+      category: 'category',
+      collectionId: 'collectionId',
+      bonus: '10',
+      sku: '456sku',
+      quantity: 'quantity',
+      images: ['imageUrl', 'imageUrl', 'imageUrl', 'imageUrl'],
+      expiryDate: '25-12-2027',
+      sellerId: 123,
+    })
+    expect(eventEmitterSpy).to.have.been.calledWith('product:created')
+    expect(res.status).to.have.been.calledWith(201)
+    expect(res.json).to.have.been.calledWith({
+      message: 'Product added successfully',
+    })
   })
 
   it('should return 409 if product already exists', async () => {
@@ -60,7 +124,7 @@ describe('addProduct', function addProductTest() {
     findOneStub.resolves({ name: 'Test Product' })
     findByPkStub.resolves({ id: 'collectionId' })
 
-    await addProduct(req, res)
+    await addProduct(req as Request, res as Response)
 
     expect(res.status).to.have.been.calledWith(409)
     expect(res.json).to.have.been.calledWith({
@@ -83,7 +147,7 @@ describe('addProduct', function addProductTest() {
 
     findByPkStub.resolves(null)
 
-    await addProduct(req, res)
+    await addProduct(req as Request, res as Response)
 
     expect(res.status).to.have.been.calledWith(404)
     expect(res.json).to.have.been.calledWith({
@@ -107,7 +171,7 @@ describe('addProduct', function addProductTest() {
 
     findByPkStub.resolves({ id: 'collectionId' })
 
-    await addProduct(req, res)
+    await addProduct(req as Request, res as Response)
 
     expect(res.status).to.have.been.calledWith(400)
     expect(res.json).to.have.been.calledWith({
@@ -135,7 +199,7 @@ describe('addProduct', function addProductTest() {
 
     findByPkStub.resolves({ id: 'collectionId' })
 
-    await addProduct(req, res)
+    await addProduct(req as Request, res as Response)
 
     expect(res.status).to.have.been.calledWith(400)
     expect(res.json).to.have.been.calledWith({
@@ -169,54 +233,11 @@ describe('addProduct', function addProductTest() {
 
     findByPkStub.resolves({ id: 'collectionId' })
 
-    await addProduct(req, res)
+    await addProduct(req as Request, res as Response)
 
     expect(res.status).to.have.been.calledWith(400)
     expect(res.json).to.have.been.calledWith({
       message: 'Please upload 4 to 8 images',
-    })
-  })
-
-  it('should add product successfully', async () => {
-    req.body = {
-      name: 'Test Product',
-      price: 10,
-      category: 'category',
-      bonus: '10',
-      sku: '456sku',
-      quantity: 'quantity',
-      expiryDate: '25-12-2027',
-    }
-    req.params = { id: 'collectionId' }
-    req.files = [
-      { path: 'imagePath1' },
-      { path: 'imagePath2' },
-      { path: 'imagePath3' },
-      { path: 'imagePath4' },
-    ] as Express.Multer.File[]
-    req.user = { id: 123 }
-
-    findOneStub.resolves(null)
-    findByPkStub.resolves({ id: 'collectionId' })
-    uploadStub.resolves({ secure_url: 'imageUrl' })
-
-    await addProduct(req, res)
-
-    expect(createStub).to.have.been.calledWith({
-      name: 'Test Product',
-      price: 10,
-      category: 'category',
-      collectionId: 'collectionId',
-      bonus: '10',
-      sku: '456sku',
-      quantity: 'quantity',
-      images: ['imageUrl', 'imageUrl', 'imageUrl', 'imageUrl'],
-      expiryDate: '25-12-2027',
-      sellerId: 123,
-    })
-    expect(res.status).to.have.been.calledWith(201)
-    expect(res.json).to.have.been.calledWith({
-      message: 'Product added successfully',
     })
   })
 
@@ -243,8 +264,7 @@ describe('addProduct', function addProductTest() {
     findByPkStub.resolves({ id: 'collectionId' })
     uploadStub.resolves({ secure_url: 'imageUrl' })
     createStub.rejects(new Error('Creation error'))
-
-    await addProduct(req, res)
+    await addProduct(req as Request, res as Response)
 
     expect(res.status).to.have.been.calledWith(500)
     expect(res.json).to.have.been.calledWith({

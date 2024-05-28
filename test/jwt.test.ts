@@ -2,7 +2,8 @@ import { expect } from 'chai'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import { generateToken, decodeToken } from '../src/utils/jwt'
 import { JWT_SECRET } from '../src/config'
-
+import { validateRedisToken } from '../src/services/tokenServices'
+import sinon, { SinonStub } from 'sinon'
 describe('generateToken function', () =>
   new Promise<void>((resolve) => {
     it('should generate a JWT token', () => {
@@ -168,5 +169,46 @@ describe('Decode Token Tests', () => {
   after(() => {
     delete process.env.JWT_EXPIRE_TIME
     delete process.env.JWT_SECRET
+  })
+})
+
+describe('validateRedisToken', () => {
+  let verifyStub: SinonStub
+  const secretKey = 'test_secret_key'
+
+  before(() => {
+    process.env.JWT_SECRET_RESET = secretKey
+  })
+
+  beforeEach(() => {
+    verifyStub = sinon.stub(jwt, 'verify')
+  })
+
+  afterEach(() => {
+    sinon.restore()
+  })
+
+  it('should return decoded token if verification is successful', () => {
+    const token = 'valid.token.here'
+    const decodedToken: JwtPayload = {
+      id: 1,
+      email: 'test@example.com',
+      iat: 1234567890,
+    }
+
+    verifyStub.withArgs(token, secretKey).returns(decodedToken)
+
+    const result = validateRedisToken(token)
+    expect(result).to.deep.equal(decodedToken)
+    expect(verifyStub.calledOnceWith(token, secretKey)).to.be.true
+  })
+
+  it('should return null if verification fails', () => {
+    const token = 'invalid.token.here'
+    verifyStub.withArgs(token, secretKey).throws(new Error('Invalid token'))
+
+    const result = validateRedisToken(token)
+    expect(result).to.be.null
+    expect(verifyStub.calledOnceWith(token, secretKey)).to.be.true
   })
 })
