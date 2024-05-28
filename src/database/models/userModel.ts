@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import sequelizeConnection from '../config/db.config';
 import UserProfile from '../models/userProfile';
 import Wishlist from './wishlistModel';
+import Cart from './cartModel'
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -50,6 +51,7 @@ class User extends Model<UserAttributes> implements UserAttributes {
       foreignKey: 'userId',
     })
     User.hasOne(Wishlist, { foreignKey: 'buyerId'});
+    User.hasOne(Cart, { foreignKey: 'buyerId' })
   }
 }
 
