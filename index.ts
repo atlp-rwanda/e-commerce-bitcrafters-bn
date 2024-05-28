@@ -20,6 +20,8 @@ import passport from './src/config/passport'
 import { ErrorHandler, notFoundHandler } from './src/utils/errorHandler'
 import registerSocketEvents from './src/utils/socketEvents'
 import socketAuthMiddleware from './src/middlewares/socketMiddleware'
+import productExpiryCron from './src/controllers/productExpiryCronJob'
+
 dotenv.config()
 
 const app: Application = express()
@@ -58,4 +60,7 @@ const io = new Server(server, {
 })
 io.use(socketAuthMiddleware)
 registerSocketEvents(io)
+
+productExpiryCron()
+
 export { app, server, sequelizeConnection }
