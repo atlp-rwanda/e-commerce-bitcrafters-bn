@@ -40,4 +40,9 @@ const orderSchema = Joi.object({
     otherwise: Joi.forbidden(),
   }),
 })
+
+export const orderStatusSchema = Joi.object({
+  status: Joi.string().valid('Pending', 'Canceled', 'Initiated','Failed', 'Completed').required(),
+})
+
 export default orderSchema
