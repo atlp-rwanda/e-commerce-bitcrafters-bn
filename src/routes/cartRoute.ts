@@ -16,4 +16,11 @@ router.post(
   validateRequest(cartSchema, 'body'),
   cartController.addToCart,
 )
+router.get(
+    '/',
+    isAuthenticated,
+    checkPermission(UserRole.BUYER),
+    cartController.viewCart,
+  )
+  
 export default router

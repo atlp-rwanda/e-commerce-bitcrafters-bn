@@ -99,4 +99,35 @@ export default class cartController {
       .status(201)
       .json({ message: 'Product added to cart successfully', cart })
   }
+
+
+  /**
+ * Gets the active cart for the user
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Promise<Response>} Promise that resolves to an Express response
+ */
+  static async viewCart(req: Request, res: Response): Promise<Response> {
+    try{
+        const userId = req.user?.id;
+  
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+  
+    const cart = await Cart.findOne({
+      where: { buyerId: userId, status: 'active' },
+    });
+  
+    if (!cart) {
+      return res.status(404).json({ message: 'No Cart Found' });
+    }
+  
+    return res.status(200).json({ message: 'Cart retrived successfully', cart });
+    }
+    catch(error){
+        return res.status(500).json({ message: 'Internal server error', error:error.message });
+    }    
+  }
+  
 }
