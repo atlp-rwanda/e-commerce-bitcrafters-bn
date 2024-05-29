@@ -19,7 +19,7 @@ import {
   getCollectionCount,
 } from '../services/productServices'
 import { UserRole } from '../database/models/userModel'
-
+import  cloudinaryUpload  from '../utils/cloudinary'
 cloudinary.v2.config({
   cloud_name: CLOUDINARY_CLOUD_NAME,
   api_key: CLOUDINARY_API_KEY,
@@ -276,7 +276,7 @@ static async listAllCollections(
 
     if (!product) {
       return res.status(404).json({
-        error:
+        error:  
           'Product not found or you are not authorized to update this product',
       })
     }
@@ -441,6 +441,129 @@ static async listAllCollections(
       return res
         .status(500)
         .json({ message: 'Internal server error', error: error.message })
+    }}
+
+  /**
+   * Get all products of the signed in user
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
+  static async getProducts(req: Request, res: Response): Promise<Response> {
+    try {
+      const sellerId = req.user?.id
+      const products = await Product.findAll({
+        where: {
+          sellerId,
+        },
+      })
+      return res.status(200).json(products)
+    } catch (error) {
+      return res.status(500).json({ message: 'Internal Server error' })
     }
   }
+  
+  /**
+   * update product
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
+  static async updateProduct(req: Request, res: Response): Promise<Response> {
+    try {
+      const { name, price, category, bonus, sku, quantity, expiryDate } = req.body
+
+      const productId = req.params.id
+      const userId = req.user.id;
+
+      const product = await Product.findByPk(productId)
+      if (!product) {
+        return res.status(404).json({ message: 'Product not found' })
+      }
+      if (product.sellerId !== userId) {
+        return res.status(403).json({ message: 'You do not have permission to update this product' });
+      }
+  
+      if (product.productStatus === 'unavailable') {
+        return res.status(400).json({ message: 'Product is not available' })
+      }
+
+      const updatedProduct = await product.update({
+        name,
+        price,
+        category,
+        bonus,
+        sku,
+        quantity,
+        expiryDate,
+      })
+      return res.status(200).json({ message: 'Product updated successfully', data: updatedProduct })
+    } catch (error) {
+      return res.status(500).json({ message: 'Internal server error', error: error.message })
+    }
+  }
+
+/**
+ * Remove images from a product
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Promise<Response>} Promise that resolves to an Express response
+ */
+static async removeImages(req: Request, res: Response): Promise<Response> {
+  try {
+    const { images } = req.body;
+    const productId = req.params.id;
+
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    const currentImages = product.images || [];
+    const updatedImages = currentImages.filter((image: string) => !images.includes(image));
+
+    if (updatedImages.length === currentImages.length) {
+      return res.status(400).json({ message: 'No images were removed', imagesToRemove: images });
+    }
+
+    await product.update({ images: updatedImages });
+    return res.status(200).json({ message: 'Images removed successfully', imagesRemaining: updatedImages });
+  } catch (error) {
+    return res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
 }
+
+ /**
+ * Update Image of a product
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Promise<Response>} Promise that resolves to an Express response
+ */
+static async addImages(req: Request, res: Response): Promise<Response> {
+  try {
+    const images = req.files as Express.Multer.File[];
+    const productId = req.params.id;
+
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    const existingImages = product.images || [];
+    const newImages = [];
+
+    for (const image of images) {
+      const fileName = `${productId}-${image.originalname}`;
+      const url = await cloudinaryUpload(image.buffer, fileName);
+      newImages.push(url);
+    }
+    const updatedImages = [...existingImages, ...newImages];
+    if (updatedImages.length < 4 || updatedImages.length > 8 ){
+      return res.status(404).json({ message: 'Only 4-8 images need to be uploaded'})
+    }
+    await product.update({ images: updatedImages });
+    return res.status(200).json({ message: 'Images added successfully', images: updatedImages });
+  } catch (error) {
+    return res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+}}
