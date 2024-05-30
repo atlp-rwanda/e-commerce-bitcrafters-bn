@@ -21,6 +21,7 @@ interface ProductAttributes {
   expiryDate: Date
   sellerId: number
   productStatus: string
+  expired: boolean
 }
 
 /**
@@ -46,6 +47,8 @@ class Product extends Model<ProductAttributes> implements ProductAttributes {
   public images!: string[]
 
   public expiryDate!: Date
+
+  public expired!: boolean
 
   public sellerId!: number
   public productStatus: string
@@ -102,6 +105,10 @@ Product.init(
     expiryDate: {
       type: DataTypes.DATE,
       allowNull: false,
+    },
+    expired: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     sellerId: {
       type: DataTypes.INTEGER,
