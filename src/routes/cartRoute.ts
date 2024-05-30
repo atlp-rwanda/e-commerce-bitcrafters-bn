@@ -23,4 +23,11 @@ router.get(
     cartController.viewCart,
   )
   
+
+router.delete(
+  '/clear',
+  isAuthenticated,
+  checkPermission(UserRole.BUYER),
+  cartController.clearCart,
+)
 export default router
