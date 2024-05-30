@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import Product from '../database/models/productModel'
 import Cart, { CartItem } from '../database/models/cartModel'
+import { clearCart } from '../services/cartService'
 
 /**
  * Cart Controller class
@@ -133,4 +134,36 @@ export default class cartController {
         .json({ message: 'Internal server error', error: error.message })
     }
   }
+ 
+  /**
+ * Clears the active cart for the user
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Promise<Response>} Promise that resolves to an Express response
+ */
+  static async clearCart(req: Request, res: Response): Promise<Response> {
+    try{
+        const userId = req.user?.id;
+  
+        if (!userId) {
+          return res.status(400).json({ message: 'User ID is required' });
+        }
+      
+        const cart = await Cart.findOne({
+          where: { buyerId: userId, status: 'active' },
+        });
+      
+        if (!cart) {
+          return res.status(404).json({ message: 'Cart not found' });
+        }
+    
+       await clearCart(cart.id)
+      
+        return res.status(200).json({ message: 'Cart cleared successfully' });
+    }
+    catch(error){
+        return res.status(500).json({ message: 'Internal server error', error:error.message });
+    } 
+  }
 }
+

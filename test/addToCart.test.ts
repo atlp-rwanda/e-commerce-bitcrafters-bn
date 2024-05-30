@@ -357,3 +357,86 @@ describe('viewCart new', () => {
     })
   })
 })
+
+describe("clearCart new", () => {
+  let req: Request;
+  let res: Response;
+  let next: NextFunction;
+  let sandbox: sinon.SinonSandbox;
+  let findCartStub: sinon.SinonStub;
+  let updateCartStub: sinon.SinonStub;
+  let saveCartStub: sinon.SinonStub;
+  let mockUser: any;
+
+  beforeEach(() => {
+    req = {
+      headers: {},
+      query: {},
+    } as Request;
+    res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.stub(),
+      locals: {},
+    } as unknown as Response;
+    next = sinon.spy();
+    sandbox = sinon.createSandbox();
+    findCartStub = sinon.stub(Cart, 'findOne');
+    updateCartStub = sinon.stub(Cart, 'update');
+    // saveCartStub = sinon.stub(Cart, 'save');
+    mockUser = { userRole: 'buyer', id: 1 };
+    req.user = mockUser;
+  });
+
+  afterEach(() => {
+    sinon.restore();
+    sandbox.restore();
+  });
+
+  it("Should return 400 if user ID is missing", async () => {
+    delete req.user; 
+    await cartController.clearCart(req, res);
+
+    expect(res.status).to.be.calledOnceWith(400);
+    expect(res.json).to.be.calledWith({ message: "User ID is required" });
+  });
+
+  it("Should return 404 if cart not found", async () => {
+    findCartStub.resolves(null);
+    await cartController.clearCart(req, res);
+
+    expect(res.status).to.be.calledOnceWith(404);
+    expect(res.json).to.be.calledWith({ message: "Cart not found" });
+  });
+
+  it("Should return 500 on database error", async () => {
+    findCartStub.throws(new Error("Database error"));
+    await cartController.clearCart(req, res);
+
+    expect(res.status).to.be.calledOnceWith(500);
+    expect(res.json).to.be.calledWith({ message: "Internal server error", error: "Database error" });
+  });
+
+ 
+  it("Should clear empty cart successfully", async () => {
+    const mockedCart = { buyerId: 1, status: "active", items: [], totalPrice: 0, totalQuantity: 0 } as Cart;
+    findCartStub.resolves(mockedCart);
+    updateCartStub.resolves()
+
+    await cartController.clearCart(req, res);
+
+    expect(res.status).to.be.calledOnceWith(200);
+    expect(res.json).to.be.calledWith({ message: "Cart cleared successfully" });
+  });
+  it("Should clear cart and return success message", async () => {
+    const mockedCart = { buyerId: 1, status: "active", items: [], totalPrice: 0, totalQuantity: 0 } as Cart;
+    findCartStub.resolves(mockedCart);
+    const updatedCart = { buyerId: 1, status: "completed", items: [], totalPrice: 0, totalQuantity: 0 } as Cart;
+  
+    updateCartStub.resolves(updatedCart)
+    await cartController.clearCart(req, res);
+  
+    expect(res.status).to.be.calledOnceWith(200);
+    expect(res.json).to.be.calledWith({ message: "Cart cleared successfully" });
+    expect(updateCartStub.calledOnce).to.be.true;
+  });
+});
