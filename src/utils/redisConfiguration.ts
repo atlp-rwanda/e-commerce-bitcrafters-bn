@@ -1,6 +1,7 @@
 import dotenv from 'dotenv'
 import { createClient } from 'redis'
 import { REDIS_PASSWORD, REDIS_HOST, REDIS_PORT } from '../config'
+import logger from './logger'
 
 dotenv.config()
 
@@ -13,5 +14,7 @@ const redisClient = createClient({
   },
 })
 
-redisClient.connect()
+redisClient.connect().catch((err) => {
+  logger.log('error', `Redis connection error: ${err}`)
+})
 export default redisClient

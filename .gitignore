@@ -20,6 +20,8 @@ dist
 
 .vscode
 
+./**/*.log
+
 
 uploads/*
 !uploads/.gitkeep
