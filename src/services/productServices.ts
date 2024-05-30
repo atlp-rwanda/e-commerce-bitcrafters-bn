@@ -49,3 +49,25 @@ export const getCollectionCount = async (sellerId:number) => {
   })
   return collections.length
 }
+
+export const searchProductsService = async (query: any) => {
+  const { query: searchQuery, minPrice, maxPrice } = query
+
+  const where: any = {}
+
+  if (searchQuery) {
+    where[Op.or] = [
+      { name: { [Op.iLike]: `%${searchQuery}%` } },
+      { category: { [Op.iLike]: `%${searchQuery}%` } },
+    ]
+  }
+
+  if (minPrice || maxPrice) {
+    where.price = {}
+    if (minPrice) where.price[Op.gte] = Number(minPrice)
+    if (maxPrice) where.price[Op.lte] = Number(maxPrice)
+  }
+
+  const products = await Product.findAll({ where })
+  return products
+}
