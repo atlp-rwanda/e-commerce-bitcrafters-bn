@@ -3,7 +3,7 @@ import { Op } from 'sequelize'
 import sendEmail from '../utils/sendEmail'
 import User from '../database/models/userModel'
 import Notification from '../database/models/notificationModel'
-
+import { OrderItem } from '../database/models/orderModel'
 export const eventEmitter = new EventEmitter()
 
 eventEmitter.on('collection:created', async (collection) => {
@@ -75,4 +75,18 @@ eventEmitter.on('product:created', async (product) => {
   })
 })
 
+eventEmitter.on('order:created', async ({ user, order }) => {
+  const productNames = order.items
+    .map((item: OrderItem) => item.name)
+    .join(', ')
+  await Notification.create({
+    userId: user.id,
+    productId: order.id,
+    message: `Your order with name ${productNames} has been placed successfully.`,
+  })
+
+  const subject = 'Order Confirmation'
+  const text = `Dear ${user.username}, your order with Name ${productNames} has been placed successfully.`
+  await sendEmail(user.email, subject, text)
+})
 export default eventEmitter

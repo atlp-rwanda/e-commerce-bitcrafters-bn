@@ -14,6 +14,7 @@ import productRoute from './src/routes/productRoute'
 import wishlistRoute from './src/routes/wishlistRoute'
 import cartRoute from './src/routes/cartRoute'
 import notificationRoute from './src/routes/notificationRoute'
+import checkoutRoute from './src/routes/checkoutRoute'
 import sequelizeConnection from './src/database/config/db.config' // Assuming you have a sequelize instance exported
 import { PORT } from './src/config'
 import passport from './src/config/passport'
@@ -43,6 +44,7 @@ app.use('/collections', productRoute)
 app.use('/wishlist', wishlistRoute)
 app.use('/cart', cartRoute)
 app.use('/notifications', notificationRoute)
+app.use('/checkout', checkoutRoute)
 
 app.use(notFoundHandler)
 

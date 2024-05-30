@@ -5,6 +5,7 @@ import User from '../src/database/models/userModel'
 import Notification from '../src/database/models/notificationModel'
 import * as sendEmail from '../src/utils/sendEmail'
 import eventEmitter from '../src/services/notificationServices'
+import Order, { OrderItem } from '../src/database/models/orderModel'
 
 const emitter = new EventEmitter()
 describe('EventEmitter', () => {
@@ -92,5 +93,62 @@ describe('EventEmitter', () => {
 
     expect(findByPkStub).to.have.been.calledWith(product.sellerId)
     expect(findAllStub).to.have.been.called
+  })
+})
+
+describe('Event Emitter - order:created', () => {
+  let user: User
+  let order: Order
+  let notificationStub: sinon.SinonStub
+  let sendEmailStub: sinon.SinonStub
+
+  beforeEach(() => {
+    user = {
+      id: 1,
+      username: 'JohnDoe',
+      email: 'john@example.com',
+    } as User
+
+    order = {
+      id: 'order-id',
+      userId: user.id,
+      items: [
+        {
+          name: 'Laptop Bags',
+          quantity: 2,
+          price: 18000,
+        },
+      ] as OrderItem[],
+    } as Order
+
+    notificationStub = sinon.stub(Notification, 'create').resolves()
+    sendEmailStub = sinon.stub(sendEmail, 'default')
+  })
+
+  afterEach(() => {
+    sinon.restore()
+  })
+
+  it('should create a notification and send an email when order is created', async () => {
+    await eventEmitter.emit('order:created', { user, order })
+
+    const productNames = order.items
+      .map((item: OrderItem) => item.name)
+      .join(', ')
+
+    expect(notificationStub.calledOnce).to.be.true
+    expect(
+      notificationStub.calledWith({
+        userId: user.id,
+        productId: order.id,
+        message: `Your order with name ${productNames} has been placed successfully.`,
+      }),
+    ).to.be.true
+
+    const subject = 'Order Confirmation'
+    const text = `Dear ${user.username}, your order with Name ${productNames} has been placed successfully.`
+
+    expect(sendEmailStub.calledOnce).to.be.true
+    expect(sendEmailStub.calledWith(user.email, subject, text)).to.be.true
   })
 })
