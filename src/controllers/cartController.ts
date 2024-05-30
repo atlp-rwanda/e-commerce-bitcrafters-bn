@@ -19,6 +19,10 @@ export default class cartController {
 
     const userId = req.user?.id
 
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' })
+    }
+
     if (!productId || !userId) {
       return res
         .status(400)
@@ -45,15 +49,7 @@ export default class cartController {
     if (!cart) {
       cart = await Cart.create({
         buyerId: userId,
-        items: [
-          {
-            productId,
-            name: product.name,
-            quantity,
-            price: product.price,
-            images: product.images,
-          },
-        ],
+        items: [],
         totalPrice: product.price * quantityNumber,
         totalQuantity: quantity,
         status: 'active',
@@ -65,7 +61,13 @@ export default class cartController {
     )
 
     if (existingCartItemIndex > -1) {
-      cart.items[existingCartItemIndex].quantity += quantityNumber
+      const existingQuantity = cart.items[existingCartItemIndex].quantity
+      const newQuantity = existingQuantity + quantityNumber
+
+      if (newQuantity > product.quantity) {
+        return res.status(400).json({ message: 'Insufficient stock' })
+      }
+      cart.items[existingCartItemIndex].quantity = newQuantity
     } else {
       const cartItem: CartItem = {
         productId: product.id,
@@ -100,34 +102,35 @@ export default class cartController {
       .json({ message: 'Product added to cart successfully', cart })
   }
 
-
   /**
- * Gets the active cart for the user
- * @param {Request} req - Express request object
- * @param {Response} res - Express response object
- * @returns {Promise<Response>} Promise that resolves to an Express response
- */
+   * Gets the active cart for the user
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
   static async viewCart(req: Request, res: Response): Promise<Response> {
-    try{
-        const userId = req.user?.id;
-  
-    if (!userId) {
-      return res.status(400).json({ message: 'User ID is required' });
+    try {
+      const userId = req.user?.id
+
+      if (!userId) {
+        return res.status(400).json({ message: 'User ID is required' })
+      }
+
+      const cart = await Cart.findOne({
+        where: { buyerId: userId, status: 'active' },
+      })
+
+      if (!cart) {
+        return res.status(404).json({ message: 'No Cart Found' })
+      }
+
+      return res
+        .status(200)
+        .json({ message: 'Cart retrived successfully', cart })
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: 'Internal server error', error: error.message })
     }
-  
-    const cart = await Cart.findOne({
-      where: { buyerId: userId, status: 'active' },
-    });
-  
-    if (!cart) {
-      return res.status(404).json({ message: 'No Cart Found' });
-    }
-  
-    return res.status(200).json({ message: 'Cart retrived successfully', cart });
-    }
-    catch(error){
-        return res.status(500).json({ message: 'Internal server error', error:error.message });
-    }    
   }
-  
 }
