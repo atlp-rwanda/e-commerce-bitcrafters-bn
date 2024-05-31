@@ -5,7 +5,7 @@ import sequelizeConnection from '../config/db.config'
 /**
  * NotificationAttributes Interface
  */
-interface NotificationAttributes {
+export interface NotificationAttributes {
   id: string
   userId: number
   productId: string
