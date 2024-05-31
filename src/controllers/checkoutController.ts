@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import Order, { OrderStatus, PaymentInfo } from '../database/models/orderModel'
 import Cart from '../database/models/cartModel'
 import { eventEmitter } from '../services/notificationServices'
+import { clearCart } from '../services/cartService'
 
 /**
  * checkout  class controller
@@ -77,7 +78,7 @@ export default class CheckoutController {
         deliveryInfo,
         paymentInfo,
       })
-      await Cart.update({ status: 'completed' }, { where: { id: cart.id } })
+      await clearCart(cart.id)
       eventEmitter.emit('order:created', { user, order })
       return res
         .status(201)

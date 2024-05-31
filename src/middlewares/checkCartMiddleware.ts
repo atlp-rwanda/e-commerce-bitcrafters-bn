@@ -19,10 +19,10 @@ const checkCartMiddleware = async (
       where: { buyerId: user.id, status: 'active' },
     })
 
-    if (!cart) {
-      return res
-        .status(404)
-        .json({ message: 'No active cart found for the user' })
+    if (!cart || cart.items.length === 0) {
+      return res.status(404).json({
+        message: 'No items found in the cart',
+      })
     }
 
     next()
