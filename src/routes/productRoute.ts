@@ -13,6 +13,7 @@ import productController from '../controllers/productController'
 import { UserRole } from '../database/models/userModel'
 import paramSchema,{ paramIdSchema } from '../validations/paramValidation'
 import multer from 'multer'
+import searchController from '../controllers/searchProduct'
 
 const router = express.Router()
 const upload = multer()
@@ -99,4 +100,9 @@ router.post(
   productController.addImages
 )
 
+router.get(
+  '/products/search',
+  isAuthenticated,
+  searchController.searchProducts,
+)
 export default router

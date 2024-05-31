@@ -22,6 +22,7 @@ interface ProductAttributes {
   sellerId: number
   productStatus: string
   expired: boolean
+  tsv?: any
 }
 
 /**
@@ -52,6 +53,8 @@ class Product extends Model<ProductAttributes> implements ProductAttributes {
 
   public sellerId!: number
   public productStatus: string
+
+  public tsv!: any
 
   /**
    * Initializes the Product model.
@@ -118,6 +121,10 @@ Product.init(
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: 'available',
+    },
+    tsv: {
+      type: DataTypes.TSVECTOR,
+      allowNull: true,
     },
   },
   {
