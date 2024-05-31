@@ -44,11 +44,9 @@
     </div>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-      // const token =
-      //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NTcwMywiZW1haWwiOiJlcmljbmVtYWNoaW5lQGdtYWlsLmNvbSIsIm90cCI6IjU1NzYiLCJpYXQiOjE3MTY4ODAwOTQsImV4cCI6MTcxNjg5ODA5NH0.0-eIbOz4Ao4NtbC7xqwemrjf8mgOg-yb_1P-58M4y9I'
       let token = prompt('Please enter your token to login', '')
 
-      const socket = io('http://localhost:3000', {
+      const socket = io('/', {
         auth: { token },
       })
       socket.on('notification', (data) => {

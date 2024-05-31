@@ -1,3 +1,4 @@
+import path from 'path'
 import express, { Application, Request, Response } from 'express'
 import http from 'http'
 import bodyParser from 'body-parser'
@@ -34,6 +35,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 app.use(cors({ credentials: true }))
 app.use(compression())
 app.use(bodyParser.json())
+app.use(express.static('public'))
 // Routes
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({ message: 'Welcome to my E-Commerce API' })
@@ -62,7 +64,6 @@ const io = new Server(server, {
 })
 io.use(socketAuthMiddleware)
 registerSocketEvents(io)
-
 productExpiryCron()
 
 export { app, server, sequelizeConnection }
