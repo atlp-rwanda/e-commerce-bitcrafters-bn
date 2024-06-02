@@ -165,5 +165,154 @@ export default class cartController {
         return res.status(500).json({ message: 'Internal server error', error:error.message });
     } 
   }
+
+
+  /**
+   * Gets the active cart for the user
+   * @param {Request} req - Express request object 
+   * @param {Response} res -Express response object
+   * @returns {Promise<Response>} promise that resolves to an Express response 
+   */
+  static async updateCart(req: Request, res: Response): Promise<Response> {
+  const { items } = req.body
+
+  if (!items) {
+    return res.status(400).json({ message: 'Items are required' })
+  }
+
+  const userId = req.user?.id
+  if (!userId) {
+    return res.status(400).json({ message: 'User ID is required' })
+  }
+
+  const cart = await Cart.findOne({
+    where: { buyerId: userId, status: 'active' },
+  })
+
+  if (!cart) {
+    return res.status(404).json({ message: 'Cart not found' })
+  }
+
+  const updatedItems: CartItem[] = [...cart.items]
+  let newTotalPrice = cart.totalPrice
+  let newTotalQuantity = cart.totalQuantity
+
+  for (const item of items) {
+    const { productId, quantity } = item
+    const quantityNumber = Number(quantity)
+
+    if (quantityNumber <= 0) {
+      return res.status(400).json({ message: 'Invalid quantity' })
+    }
+
+    const product = await Product.findByPk(productId)
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' })
+    }
+
+    const existingCartItem = updatedItems.find(
+      (cartItem) => cartItem.productId === productId,
+    )
+
+    if (existingCartItem) {
+      if (quantityNumber > product.quantity) {
+        return res.status(400).json({ message: 'Products out of stock' })
+      }
+
+      newTotalPrice -= existingCartItem.price * existingCartItem.quantity
+      newTotalQuantity -= existingCartItem.quantity
+
+      existingCartItem.quantity = quantityNumber
+      newTotalPrice += existingCartItem.price * quantityNumber
+      newTotalQuantity += quantityNumber
+    } else {
+      const cartItem: CartItem = {
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: quantityNumber,
+        images: product.images,
+      }
+
+      if (quantityNumber > product.quantity) {
+        return res.status(400).json({ message: 'Insufficient stock' })
+      }
+
+      updatedItems.push(cartItem)
+      newTotalPrice += product.price * quantityNumber
+      newTotalQuantity += quantityNumber
+    }
+  }
+
+  await Cart.update(
+    {
+      items: updatedItems,
+      totalPrice: newTotalPrice,
+      totalQuantity: newTotalQuantity,
+    },
+    { where: { id: cart.id } },
+  )
+
+  const updatedCart = await Cart.findOne({
+    where: { id: cart.id },
+  })
+
+  return res.status(200).json({
+    message: 'Cart updated successfully',
+    cart: updatedCart,
+  })
+}
+
+  /**
+   * delete product from cart
+   * @param {Request} req -Express request object
+   * @param {Response} res - 
+   * @returns {Promise<Response>} Promise that resolves to an Express response
+   */
+  static async deleteProductFromCart(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
+    const { productId } = req.params
+    const userId = req.user?.id
+   if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' })
+    }
+
+    const cart = await Cart.findOne({
+      where: { buyerId: userId, status: 'active' },
+    })
+
+    const itemIndex = cart.items.findIndex(
+      (item: CartItem) => item.productId === productId,
+    )
+    if (itemIndex === -1) {
+      return res.status(404).json({ message: 'Product not found in cart' })
+    }
+
+    cart.items.splice(itemIndex, 1)
+
+    cart.totalPrice = cart.items.reduce(
+      (total: number, item: CartItem) => total + item.price * item.quantity,
+      0,
+    )
+    cart.totalQuantity = cart.items.reduce(
+      (total: number, item: CartItem) => total + item.quantity,
+      0,
+    )
+
+    await Cart.update(
+      {
+        items: cart.items,
+        totalPrice: cart.totalPrice,
+        totalQuantity: cart.totalQuantity,
+      },
+      { where: { id: cart.id } },
+    )
+
+    return res
+      .status(200)
+      .json({ message: 'Product removed from cart successfully', cart })
+  }
 }
 

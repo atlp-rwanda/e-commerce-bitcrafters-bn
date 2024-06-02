@@ -30,4 +30,18 @@ router.delete(
   checkPermission(UserRole.BUYER),
   cartController.clearCart,
 )
+
+router.patch(
+  '/products/:productId',
+  isAuthenticated,
+  checkPermission(UserRole.BUYER),
+  cartController.updateCart,
+)
+
+router.delete(
+  '/products/:productId',
+  isAuthenticated,
+  checkPermission(UserRole.BUYER),
+  cartController.deleteProductFromCart,
+)
 export default router
