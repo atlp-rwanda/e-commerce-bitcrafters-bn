@@ -25,7 +25,7 @@ export const checkProductPurchased = async (req: Request, res: Response, next: N
         const buyerId = user.id;
 
         const order = await Order.findOne({
-            where: { userId: buyerId, status: OrderStatus.CONFIRMED },
+            where: { userId: buyerId, status: OrderStatus.COMPLETED },
         });
         const productFound = order.items.some(item => item.productId === productId)
 

@@ -31,7 +31,7 @@ describe('checkProductPurchased Middleware', () => {
     it('should return 404 if the product has not been purchased', async () => {
         const order = {
             items: [{ productId: 2 }],
-            status: OrderStatus.CONFIRMED
+            status: OrderStatus.COMPLETED
         };
         findOneStub.resolves(order);
 
