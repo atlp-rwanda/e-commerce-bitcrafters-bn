@@ -19,6 +19,9 @@ import checkoutRoute from './src/routes/checkoutRoute'
 import orderRoute from './src/routes/orderRoute'
 import chatRoute from './src/routes/chatRoute'
 import sequelizeConnection from './src/database/config/db.config' // Assuming you have a sequelize instance exported
+import User from './src/database/models/userModel'
+import Product from './src/database/models/productModel'
+import Review from './src/database/models/reviewsModel'
 import { PORT } from './src/config'
 import passport from './src/config/passport'
 import { ErrorHandler, notFoundHandler } from './src/utils/errorHandler'
@@ -56,6 +59,9 @@ app.use('/chat', chatRoute)
 app.use(notFoundHandler)
 
 app.use(ErrorHandler)
+
+Product.associate()
+Review.associate({ Product, User })
 
 const server = http.createServer(app)
 server.listen(PORT)

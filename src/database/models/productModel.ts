@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import sequelizeConnection from '../config/db.config'
 import User from './userModel'
 import Collection from './collectionModel'
+import Review from './reviewsModel'
 
 /**
  * Product Interface
@@ -52,6 +53,7 @@ class Product extends Model<ProductAttributes> implements ProductAttributes {
   public expired!: boolean
 
   public sellerId!: number
+
   public productStatus: string
 
   public tsv!: any
@@ -62,8 +64,9 @@ class Product extends Model<ProductAttributes> implements ProductAttributes {
    * @returns {void}
    */
   static associate(): void {
-    Product.belongsTo(User, { foreignKey: 'sellerId' })
+    Product.belongsTo(User, { foreignKey: 'sellerId', as: 'seller' })
     Product.belongsTo(Collection, { foreignKey: 'collectionId' })
+    Product.hasMany(Review, { as: 'reviews', foreignKey: 'productId' })
   }
 }
 Product.init(
