@@ -14,6 +14,9 @@ import { UserRole } from '../database/models/userModel'
 import paramSchema,{ paramIdSchema } from '../validations/paramValidation'
 import multer from 'multer'
 import searchController from '../controllers/searchProduct'
+import { reviewsValidationSchema } from '../validations/productValidation'
+import { addReview, getAllReviews } from '../controllers/reviewsController'
+import { checkProductPurchased } from '../middlewares/productMiddleware'
 
 const router = express.Router()
 const upload = multer()
@@ -105,4 +108,13 @@ router.get(
   isAuthenticated,
   searchController.searchProducts,
 )
+router.post(
+  '/product/:productId/reviews',
+  isAuthenticated,
+  validateRequest(reviewsValidationSchema, 'body'),
+  checkProductPurchased,
+  addReview,
+)
+router.get('/product/:productId/reviews', getAllReviews)
+
 export default router
