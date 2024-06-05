@@ -32,8 +32,10 @@ interface DeliveryInfo {
 
 export enum OrderStatus {
   PENDING = 'Pending',
-  CONFIRMED = 'Confirmed',
+  COMPLETED = 'Completed',
   CANCELED = 'Canceled',
+  INITIATED = 'Initiated',
+  FAILED = 'Failed',
 }
 
 interface OrderAttributes {
