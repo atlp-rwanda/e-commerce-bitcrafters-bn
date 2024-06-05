@@ -22,6 +22,8 @@ export interface UserAttributes {
   userRole?: string
   verified?: boolean
   status?: string
+  lastTimePasswordUpdate?: Date
+  isExpired?: boolean
 }
 
 /**
@@ -36,11 +38,15 @@ class User extends Model<UserAttributes> implements UserAttributes {
 
   public password!: string
 
+  public lastTimePasswordUpdate!: Date
+
   public userRole!: string
 
   public verified: boolean
 
   public status!: string
+
+  public isExpired?: boolean
 
   /**
    * Associations.
@@ -90,6 +96,16 @@ User.init(
     status: {
       type: DataTypes.ENUM('active', 'inactive'),
       defaultValue: 'active',
+    },
+    lastTimePasswordUpdate: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+      allowNull: false,
+    },
+    isExpired: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
     },
   },
   {

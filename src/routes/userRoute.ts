@@ -77,5 +77,6 @@ router.patch(
   '/:userId/status',
   isAuthenticated,checkPermission(UserRole.ADMIN),
    adminContoller.updateStatus)
+   
 
 export default router
