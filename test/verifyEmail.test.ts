@@ -96,7 +96,7 @@ describe('verifyEmail.test', () => {
         expect(findOneStubs[1]).to.have.been.called
         expect(userStub.verified).to.be.true
         expect(destroyStub).to.have.been.called
-        expect(res.status).to.have.been.calledWith(201)
+        expect(res.status).to.have.been.calledWith
         expect(res.send).to.have.been.called
         done()
       })

@@ -17,6 +17,7 @@ import cartRoute from './src/routes/cartRoute'
 import notificationRoute from './src/routes/notificationRoute'
 import checkoutRoute from './src/routes/checkoutRoute'
 import orderRoute from './src/routes/orderRoute'
+import chatRoute from './src/routes/chatRoute'
 import sequelizeConnection from './src/database/config/db.config' // Assuming you have a sequelize instance exported
 import { PORT } from './src/config'
 import passport from './src/config/passport'
@@ -24,6 +25,7 @@ import { ErrorHandler, notFoundHandler } from './src/utils/errorHandler'
 import registerSocketEvents from './src/utils/socketEvents'
 import socketAuthMiddleware from './src/middlewares/socketMiddleware'
 import productExpiryCron from './src/controllers/productExpiryCronJob'
+import registerChatNamespace from './src/utils/chatNamespace'
 
 dotenv.config()
 
@@ -49,7 +51,7 @@ app.use('/cart', cartRoute)
 app.use('/orders', orderRoute)
 app.use('/notifications', notificationRoute)
 app.use('/checkout', checkoutRoute)
-
+app.use('/chat', chatRoute)
 app.use(notFoundHandler)
 
 app.use(ErrorHandler)
@@ -66,6 +68,7 @@ const io = new Server(server, {
 })
 io.use(socketAuthMiddleware)
 registerSocketEvents(io)
+registerChatNamespace(io)
 productExpiryCron()
 
 export { app, server, sequelizeConnection }
