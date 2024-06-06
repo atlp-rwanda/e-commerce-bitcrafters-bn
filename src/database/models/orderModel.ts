@@ -46,6 +46,10 @@ interface OrderAttributes {
   status: OrderStatus
   deliveryInfo: DeliveryInfo
   paymentInfo: PaymentInfo
+  orderNumber: string
+  expectedDeliveryDate: string
+  reference:string
+
 }
 
 /**
@@ -65,6 +69,12 @@ class Order extends Model<OrderAttributes> implements OrderAttributes {
   public deliveryInfo!: DeliveryInfo
 
   public paymentInfo!: PaymentInfo
+
+  public orderNumber!: string;
+
+  public expectedDeliveryDate!: string;
+
+  public reference!: string
 
   public readonly createdAt!: Date
 
@@ -116,6 +126,20 @@ Order.init(
     paymentInfo: {
       type: DataTypes.JSON,
       allowNull: false,
+    },
+
+    orderNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    expectedDeliveryDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    reference: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {

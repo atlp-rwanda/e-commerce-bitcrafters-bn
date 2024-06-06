@@ -38,7 +38,10 @@ const orderSchema = Joi.object({
       .pattern(/^[0-9]{10,15}$/)
       .required(),
     otherwise: Joi.forbidden(),
+
   }),
+  orderNumber: Joi.string(),
+
 })
 
 export const orderStatusSchema = Joi.object({

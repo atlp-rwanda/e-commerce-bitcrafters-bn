@@ -1,9 +1,13 @@
+/* eslint-disable no-continue */
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 import { Request, Response } from 'express'
 import { Op } from 'sequelize'
 import moment from 'moment'
 import { UUID } from 'crypto'
 import Collection from '../database/models/collectionModel'
 import Product from '../database/models/productModel'
+import { OrderItem } from '../database/models/orderModel'
 
 const createProductQuery = (sellerId: number, productId: string) => ({
     where: {
@@ -71,3 +75,27 @@ export const searchProductsService = async (query: any) => {
   const products = await Product.findAll({ where })
   return products
 }
+
+export const decrementProductServices = async (items: OrderItem[]) => {
+  
+  for (const item of items) {
+    try {
+      const product = await Product.findByPk(item.productId);
+
+      if (!product || product.productStatus !== 'available') {
+        continue; 
+      }
+      if (item.quantity <= 0 || item.quantity > product.quantity) {
+        // console.warn(`Invalid quantity for product with ID ${item.productId}`);
+        continue; 
+      }
+
+      product.quantity -= item.quantity;
+
+      await product.save();
+
+    } catch (error) {
+      throw new Error(`Error decrementing product quantity: ${error}`);
+    }
+  }
+};

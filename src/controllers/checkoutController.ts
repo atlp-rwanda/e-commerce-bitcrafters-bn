@@ -34,6 +34,7 @@ export default class CheckoutController {
       expiryDate,
       cvv,
       mobileMoneyNumber,
+      orderNumber
     } = req.body
 
     const deliveryInfo = {
@@ -77,6 +78,7 @@ export default class CheckoutController {
         status: OrderStatus.PENDING,
         deliveryInfo,
         paymentInfo,
+        orderNumber
       })
       await clearCart(cart.id)
       eventEmitter.emit('order:created', { user, order })

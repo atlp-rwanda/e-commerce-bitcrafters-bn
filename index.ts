@@ -2,6 +2,7 @@ import path from 'path'
 import express, { Application, Request, Response } from 'express'
 import http from 'http'
 import bodyParser from 'body-parser'
+// import localtunnel from "localtunnel"
 import cors from 'cors'
 import compression from 'compression'
 import dotenv from 'dotenv'
@@ -18,6 +19,7 @@ import notificationRoute from './src/routes/notificationRoute'
 import checkoutRoute from './src/routes/checkoutRoute'
 import orderRoute from './src/routes/orderRoute'
 import chatRoute from './src/routes/chatRoute'
+import MoMoRoute from './src/routes/MoMoRoute'
 import sequelizeConnection from './src/database/config/db.config' // Assuming you have a sequelize instance exported
 import User from './src/database/models/userModel'
 import Product from './src/database/models/productModel'
@@ -56,6 +58,8 @@ app.use('/orders', orderRoute)
 app.use('/notifications', notificationRoute)
 app.use('/checkout', checkoutRoute)
 app.use('/chat', chatRoute)
+app.use('/payment', MoMoRoute)
+
 app.use(notFoundHandler)
 
 app.use(ErrorHandler)
