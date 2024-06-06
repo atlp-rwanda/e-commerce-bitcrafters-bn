@@ -3,7 +3,8 @@ import { Op } from 'sequelize'
 import sendEmail from '../utils/sendEmail'
 import User from '../database/models/userModel'
 import Notification from '../database/models/notificationModel'
-import { OrderItem } from '../database/models/orderModel'
+import Order, { OrderItem } from '../database/models/orderModel'
+import { getUserById } from './userServices'
 export const eventEmitter = new EventEmitter()
 
 eventEmitter.on('collection:created', async (collection) => {
@@ -87,6 +88,20 @@ eventEmitter.on('order:created', async ({ user, order }) => {
 
   const subject = 'Order Confirmation'
   const text = `Dear ${user.username}, your order with Name ${productNames} has been placed successfully.`
+  await sendEmail(user.email, subject, text)
+})
+
+eventEmitter.on('order:updatedStatus', async (order: Order ) => {
+  const user = await getUserById(order.userId)
+  const orderStatus = order.status
+  await Notification.create({
+    userId: order.userId,
+    productId: order.id,
+    message: `your product order is ${orderStatus}!!`,
+  })
+
+  const subject = 'Order Status'
+  const text = `Dear ${user.username}, your product order is ${orderStatus}!!`
   await sendEmail(user.email, subject, text)
 })
 export default eventEmitter

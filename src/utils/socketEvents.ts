@@ -1,7 +1,8 @@
 import { Server, Socket } from 'socket.io'
 import eventEmitter from '../services/notificationServices'
 import { UserAttributes } from '../database/models/userModel'
-import { OrderItem } from '../database/models/orderModel'
+import Order, { OrderItem } from '../database/models/orderModel'
+import { getUserById } from '../services/userServices'
 
 interface JwtPayload extends UserAttributes {
   iat?: number
@@ -26,6 +27,13 @@ const registerSocketEvents = (io: Server) => {
       .join(', ')
     io.to(user.id.toString()).emit('notification', {
       message: `Your order with name ${productNames} has been placed successfully.`,
+    })
+  })
+  eventEmitter.on('order:updatedStatus', async (order: Order) => {
+    const user = await getUserById(order.userId)
+    const orderStatus = order.status
+    io.to(user.id.toString()).emit('notification', {
+      message: `your product order is ${orderStatus}!!`,
     })
   })
 
