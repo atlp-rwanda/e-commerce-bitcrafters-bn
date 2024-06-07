@@ -4,26 +4,32 @@ orbs:
 jobs:
   build:
     docker:
+      - image: postgres:13
+        environment:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        ports:
+          - 5435:5432
       - image: cimg/node:18.17.0
     working_directory: ~/repo
     steps:
-      - setup_remote_docker:
-          version: default
       - checkout
       - run:
+          name: Install Docker Compose
+          command: |
+            apt-get update
+            apt-get install -y docker-compose
+      - run:
+          name: Install npm and curl
+          command: |
+            apt-get update
+            apt-get install -y npm curl
+      - run:
           name: update-npm
-          command: 'sudo npm install -g npm@latest'
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package-lock.json" }}
-            - v1-dependencies-
+          command: 'npm install -g npm@latest'
       - run:
           name: Install dependencies
           command: npm install
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package-lock.json" }}
       - run:
           name: Run tests
           command: npm test

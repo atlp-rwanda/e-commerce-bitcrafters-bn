@@ -30,7 +30,7 @@ const verifiedUser = {
 before(async function setup() {
   this.timeout(100000)
     await sequelizeConnection.authenticate()
-    existingUser.password = await bcrypt.hash('Testing123', 10)
+    existingUser.password = await bcrypt.hash('12345678', 10)
     const user = await User.findOne({ where: { email: existingUser.email } })
     if (!user) {
       await User.create(existingUser)
