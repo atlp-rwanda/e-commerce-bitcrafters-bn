@@ -15,15 +15,27 @@ const commonDatabaseConfig = {
 const sequelizeConfig = {
   development: {
     ...commonDatabaseConfig,
-    url: process.env.DEV_DATABASE_URL,
+    host: process.env.DEV_DATABASE_HOST, // Use host instead of URL
+    port: process.env.DEV_DATABASE_PORT, // Use port instead of URL
+    database: process.env.DEV_DATABASE_NAME,
+    username: process.env.DEV_DATABASE_USERNAME,
+    password: process.env.DEV_DATABASE_PASSWORD,
   },
   test: {
     ...commonDatabaseConfig,
-    url: process.env.TEST_DATABASE_URL,
+    host: process.env.TEST_DATABASE_HOST, // Use host instead of URL
+    port: process.env.TEST_DATABASE_PORT, // Use port instead of URL
+    database: process.env.TEST_DATABASE_NAME,
+    username: process.env.TEST_DATABASE_USERNAME,
+    password: process.env.TEST_DATABASE_PASSWORD,
   },
   production: {
     ...commonDatabaseConfig,
-    url: process.env.PROD_DATABASE_URL,
+    host: process.env.PROD_DATABASE_HOST, // Use host instead of URL
+    port: process.env.PROD_DATABASE_PORT, // Use port instead of URL
+    database: process.env.PROD_DATABASE_NAME,
+    username: process.env.PROD_DATABASE_USERNAME,
+    password: process.env.PROD_DATABASE_PASSWORD,
   },
 }
 

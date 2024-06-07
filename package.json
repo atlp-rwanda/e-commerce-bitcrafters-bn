@@ -7,7 +7,7 @@
     "start": "tsc && node dist/index.js",
     "dev": "nodemon -L --exec ts-node index.ts --watch src --ext ts,js",
     "build": "tsc && npm run migrate",
-    "test": "npm run migrate && nyc mocha --require ts-node/register test/*.ts --timeout 80000 --exit",
+    "test": "nyc mocha --require ts-node/register test/*.ts --timeout 80000 --exit",
     "coverage": "NODE_ENV=test nyc --reporter=text --reporter=lcov mocha --require ts-node/register test/*.ts --coverage --exit && nyc report --reporter=text-lcov | coveralls --exit",
     "migrate": "sequelize-cli db:migrate",
     "down": "sequelize-cli db:migrate:undo:all",
