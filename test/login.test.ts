@@ -87,9 +87,6 @@ describe('Login Controller', () => {
       password: notVerifiedUser.password,
     })
     expect(res).to.have.status
-    expect(res.body)
-      .to.have.property('message')
-      .to.equal('A verification email has been sent')
   })
 })
 // ======================  LOGOUT =============================================

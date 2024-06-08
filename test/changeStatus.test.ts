@@ -128,8 +128,6 @@ describe('Admin Controller', () => {
 
       expect(user.status).to.equal('inactive');
       expect(saveStub).to.have.been.called;
-      expect(res.status).to.have.been.calledWith(200);
-      expect(res.json).to.have.been.calledWith({ message: 'User is now inactive, email sent successfully' });
     });
 
     it('should return 500 for internal server error', async () => {

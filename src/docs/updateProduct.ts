@@ -195,10 +195,10 @@
 
 /**
  * @swagger
- * /collections/{id}/images:
+ * /collections/product/{id}/images:
  *   delete:
  *     summary: Remove images from a product
- *     tags: [Image Update]
+ *     tags: [Product Image Update]
  *     parameters:
  *       - in: path
  *         name: id
@@ -264,10 +264,10 @@
  */
 /**
  * @swagger
- * /collections/{id}/images:
+ * /collections/product/{id}/images:
  *   post:
  *     summary: Add images to a product
- *     tags: [Image Update]
+ *     tags: [Product Image Update]
  *     parameters:
  *       - in: path
  *         name: id
