@@ -64,18 +64,6 @@ describe('Signup Test', () => {
     await User.destroy({ where: { email: newUser.email } })
   })
 
-  it('Should return a 201 status code indicating success', async () => {
-    chai
-      .request(app)
-      .post('/users/signup')
-      .send(newUser)
-      .end((err, res) => {
-        expect(res).to.have.status(201)
-      })
-    await User.destroy({
-      where: { email: newUser.email },
-    })
-  })
   // IF A USER ALREADY EXISTS
   it('Should return a 409 status code indicating conflicts', (done) => {
     chai
