@@ -27,6 +27,7 @@ import socketAuthMiddleware from './src/middlewares/socketMiddleware'
 import productExpiryCron from './src/controllers/productExpiryCronJob'
 import registerChatNamespace from './src/utils/chatNamespace'
 
+import { passwordExpiryCron } from './src/utils/passwordUpdateEvent'
 dotenv.config()
 
 const app: Application = express()
@@ -70,5 +71,6 @@ io.use(socketAuthMiddleware)
 registerSocketEvents(io)
 registerChatNamespace(io)
 productExpiryCron()
+passwordExpiryCron()
 
 export { app, server, sequelizeConnection }

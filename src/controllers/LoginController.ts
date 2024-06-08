@@ -5,7 +5,8 @@ import loginSchema from '../validations/userLogin'
 import { generateToken } from '../utils/jwt'
 import { createUserProfile } from '../services/userServices'
 import Token from '../database/models/tokenModel'
-import { comparePassword } from '../utils/passwords'
+import { comparePassword,hashPassword } from '../utils/passwords'
+import userEvents from '../utils/passwordUpdateEvent'
 import otpEmailTemplate from '../utils/otpEmailTemplate'
 import redisClient from '../utils/redisConfiguration'
 import sendMail from '../utils/sendEmail'
@@ -41,6 +42,12 @@ export default class LoginController {
       )
       if (!isPasswordValid) {
         return res.status(401).json({ message: 'Invalid email or password' })
+      }
+
+      if (existingUser.isExpired === true) {
+        return res
+          .status(401)
+          .json({ message: 'Your password has expired please update it' })
       }
 
       createUserProfile(existingUser.id)

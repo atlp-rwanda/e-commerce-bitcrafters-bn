@@ -270,7 +270,11 @@ export default class UserController {
       }
 
       const hashedPassword = await hashPassword(password)
-      await user.update({ password: hashedPassword })
+      await user.update({
+         password: hashedPassword,
+         isExpired: false,
+         lastTimePasswordUpdate: new Date(),
+         })
       await redisClient.del(token)
 
       return res

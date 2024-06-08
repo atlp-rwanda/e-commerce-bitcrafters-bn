@@ -5,6 +5,8 @@ import Product from '../database/models/productModel';
 import User from '../database/models/userModel';
 import notifyProductExpiry from '../utils/productExpiryNotify';
 import logger from '../utils/logger'
+import { Request, Response, NextFunction } from 'express'
+import { passwordExpiryCron } from '../utils/passwordUpdateEvent'
 /**
  * creates a cron job for a product that has expired.
  * @returns {void} A promise that resolves when the email is sent.
@@ -37,4 +39,5 @@ catch(error){
   logger.log('error', ` ${errorr}`)
 }
 };
+
 export default productExpiryCron

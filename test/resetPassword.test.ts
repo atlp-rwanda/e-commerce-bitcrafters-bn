@@ -140,8 +140,7 @@ describe('UserController.newPassword', () => {
     sinon.stub(redisClient, 'del').resolves()
 
     await UserController.newPassword(req as Request, res as Response)
-
-    expect(user.update).to.have.been.calledWith({ password: 'hashedPassword' })
+    expect(user.update).to.have.been.calledWith({ password: 'hashedPassword',isExpired: false, lastTimePasswordUpdate: sinon.match.date })
     expect(redisClient.del).to.have.been.calledWith('validToken')
     expect(statusStub).to.have.been.calledWith(200)
     expect(jsonStub).to.have.been.calledWith({
