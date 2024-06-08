@@ -19,7 +19,7 @@ const existingUser = {
 }
 const notVerifiedUser = {
   username: 'Unverified',
-  email: 'unverified@gmail.com',
+  email: 'nottverified@gmail.com',
   password: '12345678',
 }
 const verifiedUser = {
@@ -29,12 +29,12 @@ const verifiedUser = {
 
 before(async function setup() {
   this.timeout(100000)
-    await sequelizeConnection.authenticate()
-    existingUser.password = await bcrypt.hash('Testing123', 10)
-    const user = await User.findOne({ where: { email: existingUser.email } })
-    if (!user) {
-      await User.create(existingUser)
-    }
+  await sequelizeConnection.authenticate()
+  existingUser.password = await bcrypt.hash('Testing123', 10)
+  const user = await User.findOne({ where: { email: existingUser.email } })
+  if (!user) {
+    await User.create(existingUser)
+  }
 })
 
 describe('Login Controller', () => {
@@ -92,10 +92,10 @@ describe('Login Controller', () => {
       .to.equal('A verification email has been sent')
   })
 })
- // ======================  LOGOUT =============================================
+// ======================  LOGOUT =============================================
 it('Should logout user, remove token from Redis and headers', async function () {
   this.timeout(100000)
-  
+
   // Login the user to obtain the JWT token
   const loginRes = await chai
     .request(app)
@@ -107,7 +107,9 @@ it('Should logout user, remove token from Redis and headers', async function () 
 
   const token = loginRes.body.authToken
 
-  const authenticatedUser = await User.findOne({ where: { email: existingUser.email } })
+  const authenticatedUser = await User.findOne({
+    where: { email: existingUser.email },
+  })
   if (!authenticatedUser) {
     throw new Error('Authenticated user not found')
   }

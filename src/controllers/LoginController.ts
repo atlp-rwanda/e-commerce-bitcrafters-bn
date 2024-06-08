@@ -31,8 +31,8 @@ export default class LoginController {
       if (!existingUser) {
         return res.status(404).send({ message: 'User not found' })
       }
-      if (existingUser.status==='inactive'){
-        return res.status(401).json({ message: 'User is disabled' });
+      if (existingUser.status === 'inactive') {
+        return res.status(401).json({ message: 'User is disabled' })
       }
 
       const isPasswordValid = await comparePassword(
@@ -82,6 +82,7 @@ export default class LoginController {
       const tokenPayload = {
         id: existingUser.id,
         userRole: existingUser.userRole,
+        username: existingUser.username,
         email: existingUser.email,
         otp: '',
       }
@@ -92,6 +93,7 @@ export default class LoginController {
         const otptoken = generateToken({
           id: existingUser.id,
           email: existingUser.email,
+          username: existingUser.username,
           otp,
         })
         await redisClient
@@ -107,7 +109,7 @@ export default class LoginController {
       }
 
       // Generate and return JWT token for authenticated user
-      const authToken = generateToken(tokenPayload )
+      const authToken = generateToken(tokenPayload)
       redisClient.setEx(`user:${existingUser.id}`, 86400, authToken)
       return res.status(200).send({ message: 'Login successful', authToken })
     } catch (error) {
@@ -138,13 +140,13 @@ export default class LoginController {
         if (!user) {
           return res.status(401).json({ error: 'Authentication failed' })
         }
-        const plainUser = { 
-          id:user.id,
-          username:user.username,
-          email:user.email,
-          userRole:user.userRole,
-          verified:user.verified
-         }
+        const plainUser = {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          userRole: user.userRole,
+          verified: user.verified,
+        }
         const token = generateToken(plainUser)
         res.status(200).json({ token })
         // res.redirect(`${FRONTEND_URL}/google?token=${token}`)
