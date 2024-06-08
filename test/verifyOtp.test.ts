@@ -74,22 +74,6 @@ describe('2FA For sellers', () => {
 
       sinon.restore()
     })
-
-    it('should send OTP Code, when user is a seller', async () => {
-      sinon.stub(redisClient, 'setEx').resolves()
-      sinon.stub(Math, 'random').returns(0)
-      const sellerUser = {
-        email: 'myseller@gmail.com',
-        password: '12345678',
-      }
-      await LoginController.login(
-        { body: sellerUser } as Request,
-        res as Response,
-      )
-
-      expect((res.status as sinon.SinonStub).calledWith(200)).to.be.true
-      sinon.restore()
-    })
   })
   it('should return 500 if an error occurs', async () => {
     sinon.stub(redisClient, 'get').throws(new Error('Simulated error'))

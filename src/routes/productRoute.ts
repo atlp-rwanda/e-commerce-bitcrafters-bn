@@ -90,13 +90,13 @@ router.put(
   productController.updateProduct,
 )
 router.delete(
-  '/:id/images',
+  '/product/:id/images',
   isAuthenticated,
   checkPermission(UserRole.SELLER),
   productController.removeImages
 )
 router.post(
-  '/:id/images',
+  '/product/:id/images',
   isAuthenticated,
   checkPermission(UserRole.SELLER),
   upload.array('images'),
