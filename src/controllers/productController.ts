@@ -18,13 +18,19 @@ import {
   getProductCollectionCount,
   getCollectionCount,
 } from '../services/productServices'
-import { UserRole } from '../database/models/userModel'
+import User, { UserRole } from '../database/models/userModel'
 import  cloudinaryUpload  from '../utils/cloudinary'
+import Review from '../database/models/reviewsModel'
+
 cloudinary.v2.config({
   cloud_name: CLOUDINARY_CLOUD_NAME,
   api_key: CLOUDINARY_API_KEY,
   api_secret: CLOUDINARY_API_SECRET,
 })
+
+interface CustomProduct extends Product {
+  reviews?: Review[]
+}
 
 /**
  * Product Controller class
@@ -199,10 +205,51 @@ static async listAllCollections(
     const productId = req.params.id
 
     try {
-      const product = await Product.findByPk(productId)
+      const product: CustomProduct | null = await Product.findByPk(productId, {
+        include: [
+          {
+            model: User,
+            as: 'seller',
+            attributes: ['id', 'username', 'email'],
+          },
+          {
+            model: Review,
+            as: 'reviews',
+            attributes: [
+              'id',
+              'rating',
+              'buyerId',
+              'feedback',
+              'createdAt',
+              'updatedAt',
+            ],
+            include: [
+              {
+                model: User,
+                as: 'buyer',
+                attributes: ['id', 'username'],
+              },
+            ],
+          },
+        ],
+      })
 
       if (!product) {
         return res.status(404).json({ status: 404, error: 'Product not found' })
+      }
+
+      const reviews = product.reviews || []
+      
+      const totalRating = reviews.reduce(
+        (acc: number, review: any) => acc + review.rating,
+        0,
+      )
+      const averageRating =
+        reviews.length > 0 ? totalRating / reviews.length : 0
+
+      const productWithAverageRating = {
+        ...product.toJSON(),
+        averageRating,
       }
 
       if (userRole === UserRole.ADMIN) {
@@ -210,10 +257,11 @@ static async listAllCollections(
           return res.status(200).json({
             status: 200,
             message: 'Product details retrieved successfully by admin',
-            item: product,
+            item: productWithAverageRating,
           })
         }
       }
+
       if (userRole === UserRole.SELLER) {
         if (product.sellerId !== userId) {
           return res.status(403).json({
@@ -225,7 +273,7 @@ static async listAllCollections(
           return res.status(200).json({
             status: 200,
             message: 'Product details retrieved successfully by seller',
-            item: product,
+            item: productWithAverageRating,
           })
         }
       }
@@ -248,11 +296,12 @@ static async listAllCollections(
           return res.status(200).json({
             status: 200,
             message: 'Product details retrieved successfully by buyer',
-            item: product,
+            item: productWithAverageRating,
           })
         }
       }
     } catch (error) {
+      // console.log('error is', error)
       return res
         .status(500)
         .json({ status: 500, error: 'Internal server error' })

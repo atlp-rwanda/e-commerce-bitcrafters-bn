@@ -17,7 +17,8 @@ export interface ReviewAttributes {
 /**
  * Represents a product in the system.
  */
-export class Review extends Model<ReviewAttributes> {
+export class Review extends Model<ReviewAttributes> implements ReviewAttributes {
+  
   public id!: string;
 
   public productId!: string;
@@ -40,8 +41,8 @@ export class Review extends Model<ReviewAttributes> {
     Product: typeof Product;
     User: typeof User;
   }) {
-    Review.belongsTo(models.User, {foreignKey: 'buyerId',});
-    Review.belongsTo(models.Product, {foreignKey: 'productId'});
+    Review.belongsTo(models.User, {foreignKey: 'buyerId', as: 'buyer'});
+    Review.belongsTo(models.Product, {foreignKey: 'productId', as: 'product'});
   }
 }
 
