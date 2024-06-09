@@ -24,7 +24,7 @@ describe('Update cart Total price by + or - quantity', function () {
   let updateStub: sinon.SinonStub
 
   beforeEach(() => {
-    req = express.request as Request
+    req = { user: { id: 1 } } as Request
     res = {
       status: sinon.stub().returnsThis(),
       json: sinon.stub(),
@@ -46,9 +46,7 @@ describe('Update cart Total price by + or - quantity', function () {
       await updateCart(req, res)
 
       expect(res.status).to.have.been.calledWith(400)
-      expect(res.json).to.have.been.calledWith({
-        message: 'Items are required',
-      })
+      expect(res.json).to.have.been.calledWith({ message: 'Items are required' })
     })
 
     it('should return 400 if userId is missing', async () => {
@@ -57,22 +55,16 @@ describe('Update cart Total price by + or - quantity', function () {
       await updateCart(req, res)
 
       expect(res.status).to.have.been.calledWith(400)
-      expect(res.json).to.have.been.calledWith({
-        message: 'User ID is required',
-      })
+      expect(res.json).to.have.been.calledWith({ message: 'User ID is required' })
     })
 
     it('should return 404 if cart is not found', async () => {
       req.body = { items: [] }
       req.user = { id: 1 }
       findOneStub.resolves(null)
-
-      await updateCart(req, res)
-
+      await updateCart(req as Request, res as Response)
       expect(res.status).to.have.been.calledWith(404)
-      expect(res.json).to.have.been.calledWith({
-        message: 'Cart not found',
-      })
+      expect(res.json).to.have.been.calledWith({ message: 'Cart not found' })
     })
 
     it('should return 404 if product is not found', async () => {
@@ -84,20 +76,16 @@ describe('Update cart Total price by + or - quantity', function () {
       req.user = { id: 5540, userRole: 'buyer' }
       findByPkStub.resolves(null)
       findOneStub.resolves({
-        id: '7ffc7b37-edc2-4a3a-b741-5174cda3f099',
-        buyerId: 5540,
+        id: 'cartId',
+        buyerId: 1,
         status: 'active',
         items: [] as CartItem[],
         totalPrice: 0,
         totalQuantity: 0,
       })
-
-      await updateCart(req, res)
-
+      await updateCart(req as Request, res as Response)
       expect(res.status).to.have.been.calledWith(404)
-      expect(res.json).to.have.been.calledWith({
-        message: 'Product not found',
-      })
+      expect(res.json).to.have.been.calledWith({ message: 'Product not found' })
     })
 
     it('should return 400 if quantity is invalid', async () => {
@@ -108,20 +96,16 @@ describe('Update cart Total price by + or - quantity', function () {
       }
       req.user = { id: 5540, userRole: 'buyer' }
       findOneStub.resolves({
-        id: '7ffc7b37-edc2-4a3a-b741-5174cda3f099',
-        buyerId: 5540,
+        id: 'cartId',
+        buyerId: 1,
         status: 'active',
         items: [] as CartItem[],
         totalPrice: 0,
         totalQuantity: 0,
       })
-
-      await updateCart(req, res)
-
+      await updateCart(req as Request, res as Response)
       expect(res.status).to.have.been.calledWith(400)
-      expect(res.json).to.have.been.calledWith({
-        message: 'Invalid quantity',
-      })
+      expect(res.json).to.have.been.calledWith({ message: 'Invalid quantity' })
     })
 
     it('should return 400 if quantity exceeds available product stock', async () => {
@@ -247,7 +231,6 @@ describe('Update cart Total price by + or - quantity', function () {
         totalPrice: 30,
         totalQuantity: 3,
       }
-
       findByPkStub.resolves(product)
       findOneStub
         .onFirstCall()
