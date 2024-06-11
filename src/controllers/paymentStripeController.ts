@@ -22,6 +22,7 @@ export default class PaymentController {
    * @returns {Promise<Response>} Promise that resolves to an Express response
    */
   static async processPayment(req: Request, res: Response): Promise<Response> {
+    try{
     const { currency, paymentMethodId } = req.body
     const orderId = req.params.orderId
     const userId = req.user?.id
@@ -66,6 +67,9 @@ export default class PaymentController {
     return res.status(200).json({
       message: 'Payment initiated',
     })
+  } catch (error) {
+    return res.status(500).json({message: 'Internal server error', error: error.message})
+  }
   }
 
   /**
@@ -75,6 +79,7 @@ export default class PaymentController {
    * @returns {Promise<Response>} Promise that resolves to an Express response
    */
   static async stripeReturn(req: Request, res: Response): Promise<Response> {
+    try{
     const { orderId, userId } = req.query
 
     const order = await Order.findByPk(orderId as string)
@@ -92,6 +97,9 @@ export default class PaymentController {
       message: `Thank you for your payment. Order ID: ${orderId}, User ID: ${userId}`,
       confirmation,
     })
+  } catch (error) {
+    return res.status(500).json({message: 'Internal server error', error: error.message})
+  }
   }
 
   /**
@@ -104,6 +112,7 @@ export default class PaymentController {
     req: Request,
     res: Response,
   ): Promise<Response> {
+    try{
     const eventType = req.body.type
     switch (eventType) {
       case 'payment_intent.succeeded':
@@ -123,5 +132,8 @@ export default class PaymentController {
     }
 
     return res.status(200).json({ received: true })
+  } catch (error) {
+    return res.status(500).json({message: 'Internal server error', error: error.message})
+  }
   }
 }
