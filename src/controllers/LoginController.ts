@@ -168,6 +168,7 @@ export default class LoginController {
    * @returns {Promise<Response>} Promise that resolves to an Express response
    */
   static async logOut(req: Request, res: Response): Promise<Response> {
+    try{
     const userId = req.user.id
     const tokenKey = `user:${userId}`
     const tokenExists = await redisClient.exists(tokenKey)
@@ -178,5 +179,10 @@ export default class LoginController {
       return res.status(200).json({ message: 'Logout successfully' })
     }
     return res.status(401).json({ message: 'Already logged out' })
+  }catch (error) {
+      return res
+        .status(500)
+        .send({ message: 'Internal server error', error: error.message })
+    }
   }
 }

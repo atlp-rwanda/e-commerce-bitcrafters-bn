@@ -318,6 +318,7 @@ static async listAllCollections(
     req: Request,
     res: Response,
   ): Promise<Response> {
+    try{
     const sellerId = req.user.id
     const productId = req.params.productId
     const { productStatus } = req.body
@@ -347,6 +348,9 @@ static async listAllCollections(
       data: updatedProduct,
       message: `Product updated as ${productStatus}`,
     })
+  } catch (error) {
+    return res.status(500).json({message: 'Internal server error', error: error.message})
+  }
   }
 
   /**

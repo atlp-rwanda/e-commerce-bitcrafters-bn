@@ -13,6 +13,7 @@ export default class WishlistController {
    * @returns {Promise<Response>} Promise that resolves to an Express response
    */
   static async addToWishlist(req: Request, res: Response): Promise<Response> {
+    try{
     const { productId } = req.params
 
     const buyerId = req.user?.id
@@ -60,6 +61,9 @@ export default class WishlistController {
       message: 'Product added to wishlist successfully',
       wishlist,
     })
+  } catch (error) {
+      return res.status(500).json({ message: 'Internal server error', error: error.message})
+  }
   }
 
   /**
@@ -69,6 +73,7 @@ export default class WishlistController {
    * @returns {Promise<Response>} Promise that resolves to an Express response
    */
   static async getWishlist(req: Request, res: Response): Promise<Response> {
+    try{
     const buyerId = req.user?.id
     if (!buyerId) {
       return res.status(400).json({ message: 'User ID are required' })
@@ -83,6 +88,9 @@ export default class WishlistController {
     }
 
     return res.status(200).json(wishlist)
+  } catch (error) {
+    return res.status(500).json({message: 'Internal server error', error: error.message})
+  }
   }
 
   /**
@@ -95,6 +103,7 @@ export default class WishlistController {
     req: Request,
     res: Response,
   ): Promise<Response> {
+    try{
     const { productId } = req.params
     const buyerId = req.user?.id
 
@@ -126,5 +135,8 @@ export default class WishlistController {
       message: 'Product removed from wishlist successfully',
       updatedWishlist: wishlist,
     })
+  } catch (error) {
+    return res.status(500).json({message: 'Internal server error', error: error.message})
+  }
   }
 }
