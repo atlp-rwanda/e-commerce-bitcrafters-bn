@@ -173,4 +173,48 @@
  *                 message:
  *                   type: string
  *                   example: An error occurred while processing the order
+ * /orders/all:
+ *   get:
+ *     summary: Get All Orders
+ *     description: Get all orders as an admin
+ *     tags:
+ *       [orders]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The page
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The limit of Orders
+ *     responses:
+ *       '200':
+ *         description: Orders retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Orders retrieved successfully
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: no Orders found
+ *       '401':
+ *         description: Unauthorized
+ *       '500':
+ *         description: Internal server error
  */

@@ -25,6 +25,43 @@ export const getorder = async (req: Request, res: Response) => {
     }
   };
 
+/**
+ * Get all orders as an admin
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @returns {Promise<Response>} Promise that resolves to an Express response
+ */
+export const getAllorders = async (req: Request, res: Response) => {
+    try {
+      const page: number =
+      Number.parseInt(req.query.page as unknown as string, 10) || 1
+    const limit: number =
+      Number.parseInt(req.query.limit as unknown as string, 10) || 5
+
+    if (
+      Number.isNaN(page) ||
+      Number.isNaN(limit) ||
+      page <= 0 ||
+      limit <= 0
+    ) {
+      return res
+        .status(400)
+        .json({ message: 'Invalid pagination parameters' })
+    }
+
+      const offset = (page - 1) * limit
+
+      const orders = await Order.findAll({offset, limit});
+      if (!orders) {
+        return res.status(404).json({message: 'no orders found'})
+      }
+      return res.status(200).json({message: 'Orders retrieved successful', orders})
+    } catch (err: unknown) {
+      const errors = err as Error;
+      return res.status(500).json( errors.message)
+    }
+  };
+
   /**
    * Get notifications for the authenticated user
    * @param {Request} req - Express request object
