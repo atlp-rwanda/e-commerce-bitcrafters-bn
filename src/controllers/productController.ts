@@ -495,26 +495,6 @@ static async listAllCollections(
         .status(500)
         .json({ message: 'Internal server error', error: error.message })
     }}
-
-  /**
-   * Get all products of the signed in user
-   * @param {Request} req - Express request object
-   * @param {Response} res - Express response object
-   * @returns {Promise<Response>} Promise that resolves to an Express response
-   */
-  static async getProducts(req: Request, res: Response): Promise<Response> {
-    try {
-      const sellerId = req.user?.id
-      const products = await Product.findAll({
-        where: {
-          sellerId,
-        },
-      })
-      return res.status(200).json(products)
-    } catch (error) {
-      return res.status(500).json({ message: 'Internal Server error' })
-    }
-  }
   
   /**
    * update product
