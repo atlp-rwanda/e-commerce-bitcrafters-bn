@@ -37,6 +37,19 @@
  *   get:
  *     summary: Get notifications for the authenticated user
  *     tags: [Notifications]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The page
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: The limit of Collections
  *     responses:
  *       200:
  *         description: A list of notifications

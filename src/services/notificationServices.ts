@@ -5,6 +5,7 @@ import User from '../database/models/userModel'
 import Notification from '../database/models/notificationModel'
 import Order, { OrderItem } from '../database/models/orderModel'
 import { getUserById } from './userServices'
+import { UUID } from 'crypto'
 export const eventEmitter = new EventEmitter()
 
 eventEmitter.on('collection:created', async (collection) => {
@@ -105,3 +106,13 @@ eventEmitter.on('order:updatedStatus', async (order: Order ) => {
   await sendEmail(user.email, subject, text)
 })
 export default eventEmitter
+
+
+export const getNotificationCount = async (userId:number|UUID) => {
+
+  const users = await Notification.findAll({
+    where: { userId },
+    order: [['createdAt', 'DESC']],  
+  })
+  return users.length
+}
