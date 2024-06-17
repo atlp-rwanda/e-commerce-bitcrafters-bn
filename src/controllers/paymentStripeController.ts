@@ -55,6 +55,8 @@ export default class PaymentController {
       return_url: `${baseUrl}/stripe-return?orderId=${orderId}&userId=${userId}`,
     })
 
+   
+
     order.status = OrderStatus.INITIATED
 
     const currentDate = new Date()
@@ -64,6 +66,13 @@ export default class PaymentController {
     await order.save()
     await decrementProductServices(order.items)
 
+    if (paymentIntent.status === 'requires_action' && paymentIntent.next_action?.type === 'redirect_to_url') {
+      return res.status(200).json({
+        message: '3D Secure authentication required',
+        redirectUrl: paymentIntent.next_action.redirect_to_url.url,
+      })
+    }
+
     return res.status(200).json({
       message: 'Payment initiated',
     })
@@ -72,6 +81,7 @@ export default class PaymentController {
   }
   }
 
+
   /**
    * stripeReturn and update order status
    * @param {Request} req - Express request object
@@ -79,7 +89,7 @@ export default class PaymentController {
    * @returns {Promise<Response>} Promise that resolves to an Express response
    */
   static async stripeReturn(req: Request, res: Response): Promise<Response> {
-    try{
+    
     const { orderId, userId } = req.query
 
     const order = await Order.findByPk(orderId as string)
@@ -97,9 +107,7 @@ export default class PaymentController {
       message: `Thank you for your payment. Order ID: ${orderId}, User ID: ${userId}`,
       confirmation,
     })
-  } catch (error) {
-    return res.status(500).json({message: 'Internal server error', error: error.message})
-  }
+  
   }
 
   /**
