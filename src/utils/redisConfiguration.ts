@@ -11,8 +11,9 @@ const redisClient = createClient({
   },
 })
 
-redisClient.connect().catch((err) => {
-  logger.log('error', `Redis connection error: ${err}`)
+redisClient.on('error', (err) => {
+  logger.log('error', `Redis client error: ${err}`)
 })
 
+redisClient.connect()
 export default redisClient
