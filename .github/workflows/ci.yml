@@ -34,6 +34,7 @@ env:
   URL: ${{ secrets.URL}}
   STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY}}
   REDIS_URL: ${{ secrets.REDIS_URL}}
+  FRONTEND_URL: ${{ secrets.FRONTEND_URL}}
 
 jobs:
   build:

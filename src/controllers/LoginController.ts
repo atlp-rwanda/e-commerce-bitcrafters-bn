@@ -12,6 +12,7 @@ import redisClient from '../utils/redisConfiguration'
 import sendMail from '../utils/sendEmail'
 import passport from '../config/passport'
 import { getTokenByTokenValue } from '../services/tokenServices'
+import { FRONTEND_URL} from '../config/index'
 
 /**
  * Controller class for managing user-related operations.
@@ -127,41 +128,6 @@ export default class LoginController {
   }
 
   /**
-   * Login method via google
-   * @param {Request} req - Express request object
-   * @param {Response} res - Express response object
-   * @param {NextFunction} next - Express next middleware function
-   * @returns {void}
-   */
-  static loginWithGoogle(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): void {
-    passport.authenticate(
-      'google',
-      (err: unknown, user: UserAttributes | null) => {
-        if (err) {
-          return res.status(500).json({ error: 'Internal Server Error' })
-        }
-        if (!user) {
-          return res.status(401).json({ error: 'Authentication failed' })
-        }
-        const plainUser = {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          userRole: user.userRole,
-          verified: user.verified,
-        }
-        const token = generateToken(plainUser)
-        res.status(200).json({ token })
-        // res.redirect(`${FRONTEND_URL}/google?token=${token}`)
-      },
-    )(req, res, next)
-  }
-
-  /**
    * Handles user logout
    * @param {AuthenticatedRequest} req - Express request object with user property
    * @param {Response} res - Express response object
@@ -185,4 +151,107 @@ export default class LoginController {
         .send({ message: 'Internal server error', error: error.message })
     }
   }
+   /**
+   * Login method via google
+   * @param {Request} req - Express request object
+   * @param {Response} res - Express response object
+   * @param {NextFunction} next - Express next middleware function
+   * @returns {void}
+   */
+  static async loginWithGoogle(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      passport.authenticate(
+        'google',
+        async (err: unknown, user: UserAttributes | null) => {
+          if (err) {
+            return res.status(500).json({ error: 'Internal Server Error' })
+          }
+          if (!user) {
+            return res.status(401).json({ error: 'Authentication failed' })
+          }
+          if (user.status === 'inactive') {
+            return res.status(401).json({ message: 'User is disabled' })
+          }
+          createUserProfile(user.id)
+
+          if (!user.verified) {
+            await handlePendingVerification(user, res)
+            return res.redirect(`${FRONTEND_URL}`)
+          }
+          if (user.userRole === UserRole.SELLER) {
+            await handleSellerOTP(user, res)
+            return
+          }
+          const token = generateUserToken(user)
+          res.status(200).json({ token })
+          res.redirect(`${FRONTEND_URL}/google?token=${token}`)
+        },
+      )(req, res, next)
+    } catch (error) {
+      next(error)
+    }
+  }
 }
+
+const handlePendingVerification = async (
+  user: UserAttributes,
+  res: Response,
+) => {
+  const pendingVerification = await Token.findOne({
+    where: { userId: user.id },
+  })
+  const newVerificationToken = generateToken({ id: user.id, email: user.email })
+  const baseUrl = `${process.env.NODEMAILER_BASE_URL}users/verify/${newVerificationToken}`
+  const html = verificationsEmailTemplate(user.username, baseUrl)
+
+  if (!pendingVerification) {
+    await Token.create({ userId: user.id, token: newVerificationToken })
+  } else {
+    await pendingVerification.update({ token: newVerificationToken })
+  }
+
+  try {
+    await sendMail(user.email, 'Verify Your Account', html)
+    res.status(200).send({ message: 'A verification email has been sent' })
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' })
+  }
+}
+
+const handleSellerOTP = async (user: UserAttributes, res: Response) => {
+  const otp = `${Math.floor(1000 + Math.random() * 9000)}`
+  const html = otpEmailTemplate(user.username, otp)
+  const otpToken = generateToken({
+    id: user.id,
+    email: user.email,
+    username: user.username,
+    otp,
+  })
+
+  try {
+    await redisClient.setEx(user.email, 300, `${otp}=${otpToken}`)
+    await sendMail(user.email, 'OTP Verification Code', html)
+    res.status(200).json({
+      message:
+        'Email sent to your email. Please check your inbox messages and enter the OTP for verification',
+    })
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' })
+  }
+}
+
+const generateUserToken = (user: UserAttributes) => {
+  const plainUser = {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    userRole: user.userRole,
+    verified: user.verified,
+  }
+  return generateToken(plainUser)
+}
+

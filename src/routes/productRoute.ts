@@ -77,12 +77,6 @@ router.get(
   productController.listCollectionProducts,
 )
 
-router.get(
-  '/product',
-  isAuthenticated,
-  checkPermission(UserRole.SELLER),
-  productController.getProducts,
-)
 router.put(
   '/:id/product',
   isAuthenticated,

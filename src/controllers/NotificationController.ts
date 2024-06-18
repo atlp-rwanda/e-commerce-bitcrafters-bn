@@ -49,39 +49,6 @@ class NotificationController {
     }
   }
   
-  /**
-   * Get a single notification by ID and mark it as read.
-   * @param {AuthenticatedRequest} req - Express request object
-   * @param {Response} res - Express response object
-   * @returns {Promise<Response>} Promise that resolves to an Express response
-   */
-  static async getSingleNotification(
-    req: Request,
-    res: Response,
-  ): Promise<Response> {
-    try {
-      const { notificationId } = req.params;
-      const userId = req.user.id;
-
-      const notification = await Notification.findOne({
-        where: { id: notificationId, userId },
-      });
-
-      if (!notification) {
-        return res.status(404).json({ message: 'Notification not found' });
-      }
-
-      if (!notification.isRead) {
-        await notification.update({ isRead: true });
-      }
-
-      return res.status(200).json({ data: notification });
-    } catch (error) {
-
-      return res.status(500).json({ message: 'Internal server error', error: error.message });
-    }
-  }
-
 /**
  * Mark a notification as read or unread
  * @param {Request} req - Express request object
