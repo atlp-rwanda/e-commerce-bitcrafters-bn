@@ -2,6 +2,7 @@ import { Response, Request, NextFunction } from 'express'
 import { decodeToken } from '../utils/jwt'
 import { getUserById } from '../services/userServices'
 import { UserAttributes } from '../database/models/userModel'
+import redisClient from '../utils/redisConfiguration'
 
 declare global {
   namespace Express {
@@ -34,7 +35,13 @@ const isAuthenticated = async (
 
       if(user.status === 'inactive'){
         return res.status(401).json({ message: 'User is disabled' });
-      }
+    }
+    
+    
+    const redisToken = await redisClient.get(`user:${user.id}`)
+    if (!redisToken || redisToken !== token) {
+      return res.status(401).json({ message: 'Logged out' })
+    }
 
     req.user = user
     res.locals.decoded = user

@@ -119,6 +119,7 @@ export default class LoginController {
       // Generate and return JWT token for authenticated user
       const authToken = generateToken(tokenPayload)
       redisClient.setEx(`user:${existingUser.id}`, 86400, authToken)
+       res.setHeader('Authorization', `Bearer ${authToken}`)
       return res.status(200).send({ message: 'Login successful', authToken })
     } catch (error) {
       return res
