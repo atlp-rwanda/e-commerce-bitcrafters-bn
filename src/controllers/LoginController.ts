@@ -181,15 +181,17 @@ export default class LoginController {
 
           if (!user.verified) {
             await handlePendingVerification(user, res)
-            return res.redirect(`${FRONTEND_URL}`)
           }
           if (user.userRole === UserRole.SELLER) {
             await handleSellerOTP(user, res)
             return
           }
           const token = generateUserToken(user)
-          res.status(200).json({ token })
-          res.redirect(`${FRONTEND_URL}/google?token=${token}`)
+  
+          if(user.userRole === UserRole.ADMIN){
+            res.redirect(`${FRONTEND_URL}/admin?token=${token}`)
+          }
+          res.redirect(`${FRONTEND_URL}/login?token=${token}`)
         },
       )(req, res, next)
     } catch (error) {
@@ -236,6 +238,7 @@ const handleSellerOTP = async (user: UserAttributes, res: Response) => {
   try {
     await redisClient.setEx(user.email, 300, `${otp}=${otpToken}`)
     await sendMail(user.email, 'OTP Verification Code', html)
+    res.redirect(`${FRONTEND_URL}/verify-otp`)
     res.status(200).json({
       message:
         'Email sent to your email. Please check your inbox messages and enter the OTP for verification',
