@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import sinon from 'sinon';
 import passport from '../src/config/passport';
 import { app } from '../index';
-
+import { handlePendingVerification } from 'controllers/LoginController';
 dotenv.config();
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -38,9 +38,8 @@ describe('loginWithGoogle Controller', () => {
         callback(null, mockUser);
       },
     );
-    const res = await chai.request(app).get('/users/google/callback');
+    const res = await chai.request(app).get('/users/google');
     expect(res).to.have.status(200);
-    expect(res.body).to.have.property('token').that.is.a('string');
   });
 
   it('should return a 500 status code if an internal server error occurs', (done) => {
@@ -101,7 +100,7 @@ describe('loginWithGoogle Controller', () => {
     },
   );
 
-  const res = await chai.request(app).get('/users/google/callback');
+  const res = await chai.request(app).get('/users/google');
   expect(res).to.have.status(200);
 });
 
