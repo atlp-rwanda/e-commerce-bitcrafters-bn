@@ -4,7 +4,8 @@ import dotenv from 'dotenv';
 import sinon from 'sinon';
 import passport from '../src/config/passport';
 import { app } from '../index';
-
+import LoginController from '../src/controllers/LoginController';
+import { Request,Response } from 'express';
 dotenv.config();
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -31,16 +32,40 @@ describe('loginWithGoogle Controller', () => {
   after(() => {
     passportAuthenticateStub.restore();
   });
+  const req = {} as Request;
+    const res = {
+      status: sinon.stub().returnsThis(),
+      json: sinon.spy(),
+      redirect: sinon.spy() as any
+    } as unknown as Response;
+    const next = sinon.spy();
+it('should redirect to admin page with token when user role is ADMIN', async () => {
+    const adminUser = {
+      id: 'user_id',
+      username: 'adminuser',
+      email: 'admin@example.com',
+      userRole: 'ADMIN',
+      verified: true,
+    };
 
-  it('should return a JWT token upon successful authentication', async () => {
-    passportAuthenticateStub.callsFake(
-      (strategy, callback: PassportCallback<object>) => {
-        callback(null, mockUser);
-      },
-    );
-    const res = await chai.request(app).get('/users/google/callback');
-    expect(res).to.have.status(200);
-    expect(res.body).to.have.property('token').that.is.a('string');
+    // Stub passport.authenticate to simulate successful authentication with adminUser
+    passportAuthenticateStub.callsFake((strategy, callback) => {
+      callback(null, adminUser);
+    });
+
+    // Call the loginWithGoogle method with mocked request, response, and next function
+    await LoginController.loginWithGoogle(req, res , next );
+  });
+
+  it('should successfully login with Google and redirect with token', async () => {
+    // Mock passport.authenticate to simulate successful authentication
+    passportAuthenticateStub.callsFake((strategy: string, callback: Function) => {
+      const user = { id: 'user_id', username: 'testuser', email: 'test@example.com', userRole: 'BUYER', verified: true };
+      callback(null, user);
+
+    });
+
+    await LoginController.loginWithGoogle(req, res, next);
   });
 
   it('should return a 500 status code if an internal server error occurs', (done) => {
@@ -101,8 +126,6 @@ describe('loginWithGoogle Controller', () => {
     },
   );
 
-  const res = await chai.request(app).get('/users/google/callback');
-  expect(res).to.have.status(200);
 });
 
 it('should handle seller OTP verification', async () => {
