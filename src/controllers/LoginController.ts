@@ -157,41 +157,41 @@ export default class LoginController {
    * @param {Request} req - Express request object
    * @param {Response} res - Express response object
    * @param {NextFunction} next - Express next middleware function
-   * @returns {void}
    */
   static async loginWithGoogle(
     req: Request,
     res: Response,
     next: NextFunction,
-  ): Promise<void> {
+  ) {
     try {
       passport.authenticate(
         'google',
         async (err: unknown, user: UserAttributes | null) => {
           if (err) {
-            return res.status(500).json({ error: 'Internal Server Error' })
+             res.status(500).json({ error: 'Internal Server Error' })
           }
           if (!user) {
             return res.status(401).json({ error: 'Authentication failed' })
           }
           if (user.status === 'inactive') {
-            return res.status(401).json({ message: 'User is disabled' })
+             res.status(401).json({ message: 'User is disabled' })
           }
           createUserProfile(user.id)
 
           if (!user.verified) {
             await handlePendingVerification(user, res)
+            return; 
           }
           if (user.userRole === UserRole.SELLER) {
             await handleSellerOTP(user, res)
-            return
+            return 
           }
           const token = generateUserToken(user)
-  
           if(user.userRole === UserRole.ADMIN){
-            res.redirect(`${FRONTEND_URL}/admin?token=${token}`)
+             res.redirect(`${FRONTEND_URL}/admin?token=${token}`)
+          }else{
+           res.redirect(`${FRONTEND_URL}/login?token=${token}`)
           }
-          res.redirect(`${FRONTEND_URL}/login?token=${token}`)
         },
       )(req, res, next)
     } catch (error) {
@@ -219,9 +219,9 @@ const handlePendingVerification = async (
 
   try {
     await sendMail(user.email, 'Verify Your Account', html)
-    res.status(200).send({ message: 'A verification email has been sent' })
+     res.status(200).send({ message: 'A verification email has been sent' })
   } catch (error) {
-    res.status(500).json({ message: 'Internal server error' })
+     res.status(500).json({ message: 'Internal server error' })
   }
 }
 
@@ -238,13 +238,9 @@ const handleSellerOTP = async (user: UserAttributes, res: Response) => {
   try {
     await redisClient.setEx(user.email, 300, `${otp}=${otpToken}`)
     await sendMail(user.email, 'OTP Verification Code', html)
-    res.redirect(`${FRONTEND_URL}/verify-otp`)
-    res.status(200).json({
-      message:
-        'Email sent to your email. Please check your inbox messages and enter the OTP for verification',
-    })
+     res.redirect(`${FRONTEND_URL}/verify-otp?email=${user.email}`);
   } catch (error) {
-    res.status(500).json({ message: 'Internal server error' })
+     res.status(500).json({ message: 'Internal server error' })
   }
 }
 
@@ -258,4 +254,3 @@ const generateUserToken = (user: UserAttributes) => {
   }
   return generateToken(plainUser)
 }
-
