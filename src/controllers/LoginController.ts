@@ -102,6 +102,7 @@ export default class LoginController {
           id: existingUser.id,
           email: existingUser.email,
           username: existingUser.username,
+          userRole:existingUser.userRole,
           otp,
         })
         await redisClient
