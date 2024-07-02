@@ -1,7 +1,7 @@
 import { Response, Request, NextFunction } from 'express'
 import { decodeToken } from '../utils/jwt'
 import { getUserById } from '../services/userServices'
-import { UserAttributes } from '../database/models/userModel'
+import { UserAttributes, UserRole } from '../database/models/userModel'
 import redisClient from '../utils/redisConfiguration'
 
 declare global {
@@ -39,13 +39,24 @@ const isAuthenticated = async (
     
     
     const redisToken = await redisClient.get(`user:${user.id}`)
-    if (!redisToken || redisToken !== token) {
-      return res.status(401).json({ message: 'Logged out' })
+
+     if (redisToken && redisToken === token) {
+       req.user = user
+       res.locals.decoded = user
+       return next()
     }
 
-    req.user = user
-    res.locals.decoded = user
-    next()
+    if (user.userRole === UserRole.SELLER) {
+      const otpToken = await redisClient.get(user.email)
+      if (otpToken && otpToken.split('=')[1] === token) {
+        req.user = user
+        res.locals.decoded = user
+        return next()
+      }
+    }
+
+     return res.status(401).json({ message: 'Please login again' })
+
   } catch (error) {
     res
       .status(500)

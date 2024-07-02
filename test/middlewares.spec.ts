@@ -7,7 +7,7 @@ import isAuthenticated from '../src/middlewares/authenticationMiddleware'
 import { JWT_SECRET, JWT_EXPIRE_TIME } from '../src/config'
 import * as userServiceHelpers from '../src/services/userServices'
 import * as tokenHelpers from '../src/utils/jwt'
-import User from '../src/database/models/userModel'
+import User, { UserRole } from '../src/database/models/userModel'
 import { Socket } from 'socket.io'
 import { ExtendedError } from 'socket.io/dist/namespace'
 import socketAuthMiddleware from '../src/middlewares/socketMiddleware'
@@ -299,6 +299,42 @@ describe('isAuthenticated function', () => {
     expect(next).not.to.have.been.called
   })
 
+  it('should allow authenticated seller with valid OTP token', async () => {
+    const user:any = {
+      id: 1,
+      email: 'seller@example.com',
+      userRole: UserRole.SELLER,
+    }
+    const otpToken = 'validOTP=123456'
+    const token = '123456'
+
+    req.headers = { authorization: `Bearer ${token}` }
+
+    jwtVerifyStub.callsFake((token, secret, callback) => {
+      callback(null, user)
+    })
+
+    decodeTokenStub = sandbox.stub(tokenHelpers, 'decodeToken').resolves(user)
+
+    getUserByIdStub = sandbox
+      .stub(userServiceHelpers, 'getUserById')
+      .resolves(user)
+
+    redisGetStub = sandbox
+      .stub(redisClient, 'get')
+      .withArgs(user.email)
+      .resolves(otpToken)
+
+    await isAuthenticated(req, res, next)
+
+    expect(decodeTokenStub).to.have.been.called
+    expect(getUserByIdStub).to.have.been.called
+    expect(redisGetStub).to.have.been.calledWith(user.email)
+    expect(req.user).to.deep.equal(user)
+    expect(res.locals.decoded).to.deep.equal(user)
+    expect(next).to.have.been.calledOnce
+  })
+
 
    it('should return 401 if token in Redis does not exist', async () => {
     const data = { id: 1, email: 'test@example.com' }
@@ -322,7 +358,7 @@ describe('isAuthenticated function', () => {
 
     expect(redisGetStub).to.have.been.calledWith(`user:${mockDecoded.id}`)
     expect(res.status).to.have.been.calledWith(401)
-    expect(res.json).to.have.been.calledWith({ message: 'Logged out' })
+    expect(res.json).to.have.been.calledWith({ message: 'Please login again' })
     expect(next).not.to.have.been.called
   })
 
@@ -348,7 +384,7 @@ describe('isAuthenticated function', () => {
 
     expect(redisGetStub).to.have.been.calledWith(`user:${mockDecoded.id}`)
     expect(res.status).to.have.been.calledWith(401)
-    expect(res.json).to.have.been.calledWith({ message: 'Logged out' })
+    expect(res.json).to.have.been.calledWith({ message: 'Please login again' })
     expect(next).not.to.have.been.called
   })
 
