@@ -13,99 +13,98 @@ export default class cartController {
    * @param {Response} res - Express response object
    * @returns {Promise<Response>} Promise that resolves to an Express response
    */
-  static async addToCart(req: Request, res: Response): Promise<Response> {
+static async addToCart(req: Request, res: Response): Promise<Response> {
+    try {
+      const { quantity } = req.body
+      const { productId } = req.params
+      const userId = req.user?.id
 
-    try{
-    const { quantity } = req.body
+      if (!userId) {
+        return res.status(400).json({ message: 'User ID is required' })
+      }
 
-    const { productId } = req.params
+      if (!productId || !userId) {
+        return res
+          .status(400)
+          .json({ message: 'Product ID and user ID are required' })
+      }
 
-    const userId = req.user?.id
+      const quantityNumber = Number(quantity)
+      if (quantityNumber <= 0) {
+        return res.status(400).json({ message: 'Invalid quantity' })
+      }
 
-    if (!userId) {
-      return res.status(400).json({ message: 'User ID is required' })
-    }
+      const product = await Product.findByPk(productId)
+      if (!product) {
+        return res.status(404).json({ message: 'Product not found' })
+      }
 
-    if (!productId || !userId) {
-      return res
-        .status(400)
-        .json({ message: 'Product ID and user ID are required' })
-    }
-
-    const quantityNumber = Number(quantity)
-    if (quantityNumber <= 0) {
-      return res.status(400).json({ message: 'Invalid quantity' })
-    }
-
-    const product = await Product.findByPk(productId)
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' })
-    }
-    if (product.quantity < quantity) {
-      return res.status(400).json({ message: 'Product out of stock' })
-    }
-
-    let cart = await Cart.findOne({
-      where: { buyerId: userId, status: 'active' },
-    })
-
-    if (!cart) {
-      cart = await Cart.create({
-        buyerId: userId,
-        items: [],
-        totalPrice: product.price * quantityNumber,
-        totalQuantity: quantity,
-        status: 'active',
+      let cart = await Cart.findOne({
+        where: { buyerId: userId, status: 'active' },
       })
-    }
 
-    const existingCartItemIndex = cart.items.findIndex(
-      (items: CartItem) => items.productId === productId,
-    )
-
-    if (existingCartItemIndex > -1) {
-      const existingQuantity = cart.items[existingCartItemIndex].quantity
-      const newQuantity = existingQuantity + quantityNumber
-
-      if (newQuantity > product.quantity) {
-        return res.status(400).json({ message: 'Insufficient stock' })
+      if (!cart) {
+        cart = await Cart.create({
+          buyerId: userId,
+          items: [],
+          totalPrice: product.price * quantityNumber,
+          totalQuantity: quantityNumber,
+          status: 'active',
+        })
       }
-      cart.items[existingCartItemIndex].quantity = newQuantity
-    } else {
-      const cartItem: CartItem = {
-        productId: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: quantityNumber,
-        images: product.images,
+
+      const existingCartItemIndex = cart.items.findIndex(
+        (item: CartItem) => item.productId === productId,
+      )
+
+      if (existingCartItemIndex > -1) {
+        const existingQuantity = cart.items[existingCartItemIndex].quantity
+        const newQuantity = existingQuantity + quantityNumber
+
+        if (newQuantity > product.quantity) {
+          return res.status(400).json({ message: 'Insufficient stock' })
+        }
+
+        cart.items[existingCartItemIndex].quantity = newQuantity
+      } else {
+        if (quantityNumber > product.quantity) {
+          return res.status(400).json({ message: 'Insufficient stock' })
+        }
+
+        const cartItem: CartItem = {
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          quantity: quantityNumber,
+          images: product.images,
+        }
+        cart.items.push(cartItem)
       }
-      cart.items.push(cartItem)
+
+      cart.totalPrice = cart.items.reduce(
+        (total: number, item: CartItem) => total + item.price * item.quantity,
+        0,
+      )
+      cart.totalQuantity = cart.items.reduce(
+        (total: number, item: CartItem) => total + item.quantity,
+        0,
+      )
+
+      await Cart.update(
+        {
+          items: cart.items,
+          totalPrice: cart.totalPrice,
+          totalQuantity: cart.totalQuantity,
+        },
+        { where: { id: cart.id } },
+      )
+
+      return res
+        .status(201)
+        .json({ message: 'Product added to cart successfully', cart })
+    } catch (error) {
+      return res.status(500).json({ message: 'Internal server error', error: error.message })
     }
-
-    cart.totalPrice = cart.items.reduce(
-      (total: number, item: CartItem) => total + item.price * item.quantity,
-      0,
-    )
-    cart.totalQuantity = cart.items.reduce(
-      (total: number, item: CartItem) => total + item.quantity,
-      0,
-    )
-
-    await Cart.update(
-      {
-        items: cart.items,
-        totalPrice: cart.totalPrice,
-        totalQuantity: cart.totalQuantity,
-      },
-      { where: { id: cart.id } },
-    )
-
-    return res
-      .status(201)
-      .json({ message: 'Product added to cart successfully', cart })
-  } catch (error) {
-    return res.status(500).json({message: 'Internal server error', error: error.message})
-  }
   }
 
   /**
