@@ -75,6 +75,11 @@ router.get(
   '/products/all',
   productController.listUserProducts,
 )
+
+router.get(
+  '/products/single/:productId',
+  productController.listSingleUserProduct,
+)
 router.get(
   '/:collectionId/products',
   isAuthenticated,
@@ -106,6 +111,11 @@ router.get(
   '/products/search',
   isAuthenticated,
   searchController.searchProducts,
+)
+
+router.get(
+  '/products/all/search',
+  searchController.searchAllProducts,
 )
 router.post(
   '/product/:productId/reviews',

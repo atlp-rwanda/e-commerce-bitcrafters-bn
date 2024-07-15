@@ -362,3 +362,55 @@
  *       '500':
  *         description: Internal server error
  */
+
+/**
+ * @swagger
+ * /collections/products/single/{productId}:
+ *   get:
+ *     summary: Get All products with out login
+ *     description: Get all product with out login
+ *     tags:
+ *       [PRODUCT]
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The product Id
+ *     responses:
+ *       '200':
+ *         description: Product retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product retrieved successfully
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Seller has no Product
+ *       '401':
+ *         description: Unauthorized
+ *       '404':
+ *         description: Product not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product not found
+ *       '500':
+ *         description: Internal server error
+ */
