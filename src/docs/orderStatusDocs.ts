@@ -68,14 +68,6 @@
  *           enum:
  *             - creditCard
  *             - mobileMoney
- *         cardNumber:
- *           type: string
- *         cardHolderName:
- *           type: string
- *         expiryDate:
- *           type: string
- *         cvv:
- *           type: string
  *         mobileMoneyNumber:
  *           type: string
  */

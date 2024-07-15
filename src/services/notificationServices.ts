@@ -62,7 +62,7 @@ eventEmitter.on('product:created', async (product) => {
   })
 
   const subject = 'Your product has been added'
-  const text = `Your product ${product.name} has been added! Check it out: ${product.url}`
+  const text = `Your product ${product.name} has been added! Check it out`
   await sendEmail(user.email, subject, text)
 
   users.forEach(async (user) => {
@@ -72,7 +72,7 @@ eventEmitter.on('product:created', async (product) => {
       message: `A new product has been added: ${product.name}`,
     })
     const subject = 'New product added'
-    const text = `We've added a new product: ${product.name}! Check it out: ${product.url}`
+    const text = `We've added a new product: ${product.name}! Check it out`
     await sendEmail(user.email, subject, text)
   })
 })

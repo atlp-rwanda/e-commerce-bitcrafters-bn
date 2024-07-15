@@ -22,63 +22,68 @@ export default class PaymentController {
    * @returns {Promise<Response>} Promise that resolves to an Express response
    */
   static async processPayment(req: Request, res: Response): Promise<Response> {
-    try{
-    const { currency, paymentMethodId } = req.body
-    const orderId = req.params.orderId
-    const userId = req.user?.id
-
-    const baseUrl = URL
-
-    if (!userId) {
-      return res.status(400).json({ message: 'User ID is required' })
-    }
-
-    const order = await Order.findByPk(orderId)
-    if (!order || order.userId !== userId) {
-      return res.status(404).json({ message: 'Order not found' })
-    }
-
-    if (!order.items || !Array.isArray(order.items)) {
-      return res
-        .status(400)
-        .json({ message: 'Order items are missing or invalid' })
-    }
-
-    const amount = order.totalAmount
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency,
-      payment_method: paymentMethodId,
-      confirm: true,
-      metadata: { orderId, userId },
-      return_url: `${baseUrl}/stripe-return?orderId=${orderId}&userId=${userId}`,
-    })
-
-   
-
-    order.status = OrderStatus.INITIATED
-
-    const currentDate = new Date()
-    currentDate.setDate(currentDate.getDate() + 10)
-    order.expectedDeliveryDate = currentDate.toISOString().split('T')[0]
-
-    await order.save()
-    await decrementProductServices(order.items)
-
-    if (paymentIntent.status === 'requires_action' && paymentIntent.next_action?.type === 'redirect_to_url') {
-      return res.status(200).json({
-        message: '3D Secure authentication required',
-        redirectUrl: paymentIntent.next_action.redirect_to_url.url,
+    try {
+      const { currency, paymentMethodId } = req.body
+      const orderId = req.params.orderId
+      const userId = req.user?.id
+  
+      const baseUrl = URL
+  
+      if (!userId) {
+        return res.status(400).json({ message: 'User ID is required' })
+      }
+  
+      const order = await Order.findByPk(orderId)
+      if (!order || order.userId !== userId) {
+        return res.status(404).json({ message: 'Order not found' })
+      }
+  
+      if (!order.items || !Array.isArray(order.items)) {
+        return res
+          .status(400)
+          .json({ message: 'Order items are missing or invalid' })
+      }
+  
+      const amount = order.totalAmount
+  
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency,
+        payment_method: paymentMethodId,
+        confirmation_method: 'automatic',
+        confirm: true,
+        metadata: { orderId, userId },
+        return_url: `${baseUrl}/stripe-return?orderId=${orderId}&userId=${userId}`,
       })
-    }
+  
+      order.status = OrderStatus.INITIATED
+  
+      const currentDate = new Date()
+      currentDate.setDate(currentDate.getDate() + 10)
+      order.expectedDeliveryDate = currentDate.toISOString().split('T')[0]
+  
+      await order.save()
+      await decrementProductServices(order.items)
 
-    return res.status(200).json({
-      message: 'Payment initiated',
-    })
-  } catch (error) {
-    return res.status(500).json({message: 'Internal server error', error: error.message})
-  }
+      if (paymentIntent.status === 'requires_action' && paymentIntent.next_action?.type === 'redirect_to_url') {
+        return res.status(200).json({
+          message: '3D Secure authentication required',
+          redirectUrl: paymentIntent.next_action.redirect_to_url.url,
+          clientSecret: paymentIntent.client_secret,
+          success: false,
+        })
+      }
+
+
+      return res.status(200).json({
+        clientSecret: paymentIntent.client_secret,
+        message: 'Payment intent created and confirmed',
+        paymentIntentId: paymentIntent.id,
+        success: paymentIntent.status === 'succeeded',
+      });
+    } catch (error) {
+      return res.status(500).json({message: 'Internal server error', error: error.message})
+    }
   }
 
 

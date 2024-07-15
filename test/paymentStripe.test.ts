@@ -179,7 +179,10 @@ describe('processPayment', function processPaymentTest() {
       expect(order.save).to.have.been.calledOnce
       expect(res.status).to.have.been.calledWith(200)
       expect(res.json).to.have.been.calledWith({
-        message: 'Payment initiated',
+        clientSecret: sinon.match.string,
+        message: 'Payment intent created and confirmed',
+        paymentIntentId:  sinon.match.string,
+        success: true,
       })
     })
   })

@@ -13,10 +13,6 @@ export interface OrderItem {
 
 export interface PaymentInfo {
   method: 'creditCard' | 'mobileMoney'
-  cardNumber?: string
-  cardHolderName?: string
-  expiryDate?: string
-  cvv?: string
   mobileMoneyNumber?: string
 }
 
