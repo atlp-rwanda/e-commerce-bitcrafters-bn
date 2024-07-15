@@ -48,8 +48,7 @@ interface OrderAttributes {
   paymentInfo: PaymentInfo
   orderNumber: string
   expectedDeliveryDate: string
-  reference:string
-
+  reference: string
 }
 
 /**
@@ -70,9 +69,9 @@ class Order extends Model<OrderAttributes> implements OrderAttributes {
 
   public paymentInfo!: PaymentInfo
 
-  public orderNumber!: string;
+  public orderNumber!: string
 
-  public expectedDeliveryDate!: string;
+  public expectedDeliveryDate!: string
 
   public reference!: string
 

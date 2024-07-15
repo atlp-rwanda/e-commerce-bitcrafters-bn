@@ -218,3 +218,55 @@
  *       '500':
  *         description: Internal server error
  */
+
+/**
+ * @swagger
+ * /orders/{orderId}:
+ *   get:
+ *     summary: Get buyer order
+ *     description: Get order created by a buyer
+ *     tags:
+ *       [orders]
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order Id
+ *     responses:
+ *       '200':
+ *         description: Orders retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Orders retrieved successfully
+ *       '400':
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Seller has no Order
+ *       '401':
+ *         description: Unauthorized
+ *       '404':
+ *         description: Order not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Order not found
+ *       '500':
+ *         description: Internal server error
+ */

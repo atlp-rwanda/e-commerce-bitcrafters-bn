@@ -70,6 +70,11 @@ router.get(
   excludePermission(UserRole.SELLER),
   productController.listProducts,
 )
+
+router.get(
+  '/products/all',
+  productController.listUserProducts,
+)
 router.get(
   '/:collectionId/products',
   isAuthenticated,
