@@ -44,7 +44,10 @@ interface OrderAttributes {
   paymentInfo: PaymentInfo
   orderNumber: string
   expectedDeliveryDate: string
-  reference: string
+  reference:string
+  createdAt: Date
+  updatedAt: Date 
+
 }
 
 /**
@@ -135,6 +138,16 @@ Order.init(
     reference: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {
