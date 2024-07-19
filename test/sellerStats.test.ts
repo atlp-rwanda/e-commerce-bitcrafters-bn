@@ -43,31 +43,6 @@ describe('getStatsController', function getStatsControllerTest() {
       })
     })
 
-    it('should return 404 if no orders found for the given time frame', async () => {
-      req.query = { startDate: '2023-01-01', endDate: '2023-12-31' }
-      findAllStub.resolves([])
-
-      await getStatsController.getSellerStats(req, res)
-
-      expect(res.status).to.have.been.calledWith(404)
-      expect(res.json).to.have.been.calledWith({
-        message: 'No orders found for the given time frame',
-      })
-    })
-
-    it('should return 404 if no items found for the seller in the given time frame', async () => {
-      req.query = { startDate: '2023-01-01', endDate: '2023-12-31' }
-      findAllStub.resolves([{ items: [{ productId: 'product123' }] }])
-      findOneStub.resolves(null)
-
-      await getStatsController.getSellerStats(req, res)
-
-      expect(res.status).to.have.been.calledWith(404)
-      expect(res.json).to.have.been.calledWith({
-        message: 'No items found for the seller in the given time frame',
-      })
-    })
-
     it('should return seller stats successfully', async () => {
       req.query = { startDate: '2023-01-01', endDate: '2023-12-31' }
       const mockOrders = [

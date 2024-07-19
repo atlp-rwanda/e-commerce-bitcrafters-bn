@@ -40,12 +40,6 @@ export default class getStatsController {
         },
       })
 
-      if (orders.length === 0) {
-        return res
-          .status(404)
-          .json({ message: 'No orders found for the given time frame' })
-      }
-
       const sellerItems: {
         productId: string
         name: string
@@ -69,13 +63,7 @@ export default class getStatsController {
         }
       }
 
-      if (sellerItems.length === 0) {
-        return res
-          .status(404)
-          .json({
-            message: 'No items found for the seller in the given time frame',
-          })
-      }
+    
 
       const totalAmount = sellerItems.reduce(
         (total, item) => total + item.amount,
