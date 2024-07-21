@@ -1,3 +1,4 @@
+/* eslint-disable no-else-return */
 /* eslint-disable no-case-declarations */
 import { Request, Response } from 'express'
 import Stripe from 'stripe'
@@ -82,7 +83,14 @@ export default class PaymentController {
         success: paymentIntent.status === 'succeeded',
       });
     } catch (error) {
-      return res.status(500).json({message: 'Internal server error', error: error.message})
+      if (error instanceof Stripe.errors.StripeCardError) {
+        return res.status(400).json({ message: error.message });
+        
+      } else if (error instanceof Stripe.errors.StripeInvalidRequestError) {
+        return res.status(400).json({ message: error.message });
+      } else {
+        return res.status(500).json({ message: 'Internal server error', error: error.message });
+      }
     }
   }
 
