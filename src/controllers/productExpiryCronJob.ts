@@ -26,11 +26,13 @@ try{
     });
 
     for (const product of products) {
+      if(product.productStatus !== 'unavailable'){
+        await product.update({ productStatus: 'unavailable' });
+      }
       if (!product.expired) {
         await product.update({ expired: true });
         await notifyProductExpiry(product);
       }
-      await product.update({ productStatus: 'unavailable' });
     }
   });
 }
