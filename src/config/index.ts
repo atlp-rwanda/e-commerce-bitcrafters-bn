@@ -52,3 +52,4 @@ export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET
 export const FRONTEND_URL = process.env.FRONTEND_URL
 export const RESET_BASE_URL = process.env.RESET_BASE_URL
+export const BACKEND_URL = process.env.BACKEND_URL

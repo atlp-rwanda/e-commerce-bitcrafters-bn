@@ -1,5 +1,5 @@
 import swaggerJsdoc, { Options } from 'swagger-jsdoc'
-import { PORT } from '../config'
+import { PORT, BACKEND_URL } from '../config'
 
 const swaggerOptions: Options = {
   swaggerDefinition: {
@@ -15,7 +15,7 @@ const swaggerOptions: Options = {
         description: 'Local Server',
       },
       {
-        url: `https://e-commerce-bitcrafters-bn-1mpf.onrender.com`,
+        url: `${BACKEND_URL}`,
         description: 'Deployed Server',
       },
       {
