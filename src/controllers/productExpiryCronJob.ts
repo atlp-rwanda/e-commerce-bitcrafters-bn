@@ -34,6 +34,8 @@ try{
         await notifyProductExpiry(product);
       }
     }
+  }, {
+    timezone: 'Africa/Kigali',
   });
 }
 catch(error){
